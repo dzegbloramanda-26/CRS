@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Resource Systems — Ghana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0F1A14;
+  --canvas:#FAFAF7;
+  --forest:#1A5C34;
+  --sage:#4C8B5E;
+  --gold:#B8860B;
+  --amber:#D4A017;
+  --warm:#F4F0E8;
+  --mist:#E8EDE9;
+  --rule:rgba(15,26,20,.1);
+  --muted:#5C6B62;
+  --serif:'Playfair Display',Georgia,serif;
+  --body:'Figtree',system-ui,sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--canvas);color:var(--ink);font-family:var(--body);font-weight:300;line-height:1.65;overflow-x:hidden}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--canvas)}
+::-webkit-scrollbar-thumb{background:var(--forest)}
+
+/* ── NAV ── */
+.site-nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 3rem;background:rgba(250,250,247,.96);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--rule);
+  transition:box-shadow .3s
+}
+.site-nav.raised{box-shadow:0 1px 20px rgba(15,26,20,.07)}
+.brand{display:flex;align-items:center;gap:.75rem;cursor:pointer}
+.brand-mark{width:30px;height:30px;flex-shrink:0}
+.brand-text{display:flex;flex-direction:column;gap:.05rem}
+.brand-name{font-family:var(--serif);font-size:.92rem;font-weight:500;letter-spacing:.01em;color:var(--ink);line-height:1.1}
+.brand-sub{font-size:.5rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold)}
+.nav-menu{display:flex;align-items:center;list-style:none;gap:.1rem}
+.nav-item{position:relative}
+.nav-link{
+  display:flex;align-items:center;gap:.25rem;font-size:.7rem;
+  letter-spacing:.1em;text-transform:uppercase;font-weight:400;
+  color:var(--ink);opacity:.45;cursor:pointer;padding:.5rem .85rem;
+  transition:opacity .2s;white-space:nowrap
+}
+.nav-link:hover,.nav-link.on{opacity:1}
+.nav-link.on::after{content:'';position:absolute;bottom:-1px;left:.85rem;right:.85rem;height:2px;background:var(--forest)}
+.nav-caret{font-size:.4rem;margin-top:.08rem;transition:transform .2s;display:inline-block}
+.nav-item:hover .nav-caret{transform:rotate(180deg)}
+.dropdown{
+  position:absolute;top:calc(100% + 1px);left:0;min-width:200px;
+  background:var(--canvas);border:1px solid var(--rule);
+  box-shadow:0 6px 28px rgba(15,26,20,.08);
+  opacity:0;visibility:hidden;transform:translateY(-4px);
+  transition:opacity .18s,transform .18s,visibility .18s;z-index:600
+}
+.nav-item:hover .dropdown{opacity:1;visibility:visible;transform:translateY(0)}
+.dropdown a{
+  display:block;padding:.68rem 1.15rem;font-size:.66rem;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  cursor:pointer;border-bottom:1px solid var(--rule);transition:background .15s,color .15s
+}
+.dropdown a:last-child{border-bottom:none}
+.dropdown a:hover{background:var(--warm);color:var(--forest)}
+
+/* ── PAGE SYSTEM ── */
+.pg{display:none;opacity:0;transition:opacity .35s;min-height:100vh;padding-top:64px}
+.pg.show{display:block}
+.pg.vis{opacity:1}
+.spg{display:none}
+.spg.show{display:block}
+
+/* ── REVEAL ── */
+.r{opacity:0;transform:translateY(18px);transition:opacity .65s ease,transform .65s ease}
+.r.in{opacity:1;transform:none}
+
+/* ── SHARED ── */
+.wrap{max-width:1280px;margin:0 auto;padding:0 3rem}
+.cta{
+  display:inline-flex;align-items:center;gap:.55rem;
+  font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;font-weight:400;
+  color:var(--forest);cursor:pointer;border-bottom:1px solid rgba(26,92,52,.3);
+  padding-bottom:.18rem;transition:color .2s,border-color .2s
+}
+.cta:hover{color:var(--gold);border-color:rgba(212,160,23,.4)}
+.cta-inv{color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.18)}
+.cta-inv:hover{color:var(--amber);border-color:rgba(212,160,23,.4)}
+.pg-banner{
+  padding:6rem 3rem 4.5rem;border-bottom:1px solid var(--rule);
+  display:grid;grid-template-columns:1.1fr 1fr;gap:4rem;align-items:end;
+  max-width:1280px;margin:0 auto
+}
+.pg-banner-eyebrow{font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--forest);margin-bottom:1.4rem;display:block}
+.pg-banner-h{font-family:var(--serif);font-size:clamp(2.2rem,4.2vw,3.8rem);font-weight:400;line-height:1.07;letter-spacing:-.02em}
+.pg-banner-h em{font-style:italic;color:var(--forest)}
+.pg-banner-body{font-size:.9rem;color:var(--muted);line-height:2}
+
+/* ── TICKER ── */
+.ticker{overflow:hidden;background:var(--forest);padding:.65rem 0}
+.ticker-belt{display:flex;width:max-content;animation:belt 40s linear infinite}
+.ticker-item{
+  font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(255,255,255,.5);white-space:nowrap;padding:0 2.5rem;
+  display:flex;align-items:center
+}
+.ticker-item::after{content:'·';margin-left:2.5rem;opacity:.35;font-size:.45rem}
+
+/* ── HOME HERO ── */
+.hero{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 64px);border-bottom:1px solid var(--rule)}
+.hero-l{padding:6rem 3rem 5rem;display:flex;flex-direction:column;justify-content:flex-end;border-right:1px solid var(--rule)}
+.hero-eyebrow{font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;color:var(--forest);margin-bottom:2rem;opacity:0;animation:up .8s .1s forwards}
+.hero-h{font-family:var(--serif);font-size:clamp(3rem,5.6vw,5.6rem);font-weight:400;line-height:1;letter-spacing:-.028em;margin-bottom:2.2rem;opacity:0;animation:up .8s .22s forwards}
+.hero-h em{font-style:italic;color:var(--forest)}
+.hero-lead{font-size:.93rem;color:var(--muted);max-width:38ch;line-height:2;opacity:0;animation:up .8s .38s forwards}
+.hero-actions{display:flex;align-items:center;gap:2.4rem;margin-top:2.5rem;opacity:0;animation:up .8s .52s forwards}
+.btn-primary{
+  font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;font-weight:500;
+  background:var(--forest);color:#fff;border:none;padding:.85rem 2rem;
+  cursor:pointer;transition:background .25s;font-family:var(--body)
+}
+.btn-primary:hover{background:var(--ink)}
+.hero-r{background:var(--mist);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.hero-svg{width:68%;max-width:380px;opacity:0;animation:fade 1.5s .7s forwards}
+.kente{position:absolute;right:0;top:0;bottom:0;width:7px;background:repeating-linear-gradient(to bottom,var(--gold) 0 14px,var(--forest) 14px 28px,var(--ink) 28px 42px,#8B3A1A 42px 56px)}
+
+/* ── ABOUT STRIP ── */
+.about{display:grid;grid-template-columns:1fr 1.65fr;background:var(--forest);color:#fff}
+.about-l{padding:5rem 3rem;border-right:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;justify-content:center;gap:2rem}
+.about-r{padding:5rem 3.5rem;display:flex;flex-direction:column;justify-content:center}
+.about-over{font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.42);margin-bottom:1.2rem}
+.about-h{font-family:var(--serif);font-size:clamp(2rem,3vw,2.6rem);font-weight:400;line-height:1.15;margin-bottom:1.6rem}
+.about-h em{font-style:italic;color:var(--amber)}
+.about-p{font-size:.88rem;color:rgba(255,255,255,.62);line-height:2;max-width:52ch}
+.about-p+.about-p{margin-top:.9rem}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid rgba(255,255,255,.1)}
+.stat-cell{padding:1.8rem 1.6rem;border-right:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1)}
+.stat-cell:nth-child(2n){border-right:none}
+.stat-cell:nth-child(n+3){border-bottom:none}
+.stat-n{font-family:var(--serif);font-size:2.6rem;font-weight:400;line-height:1;color:var(--amber);display:block;margin-bottom:.3rem}
+.stat-l{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)}
+
+/* ── SERVICES PREVIEW ── */
+.svc-preview{padding:6rem 3rem;background:var(--canvas)}
+.section-header{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:2rem;border-bottom:1px solid var(--rule);margin-bottom:4rem}
+.section-h{font-family:var(--serif);font-size:clamp(1.9rem,3.4vw,2.9rem);font-weight:400}
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule)}
+.svc-card{padding:2.4rem 2.2rem;border-right:1px solid var(--rule);position:relative;overflow:hidden;transition:background .35s}
+.svc-card:nth-child(3n){border-right:none}
+.svc-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--forest);transform:scaleX(0);transform-origin:left;transition:transform .38s}
+.svc-card:hover::after{transform:scaleX(1)}
+.svc-card:hover{background:var(--warm)}
+.svc-n{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:.7rem}
+.svc-name{font-family:var(--serif);font-size:1.38rem;font-weight:400;line-height:1.2;margin-bottom:.7rem}
+.svc-desc{font-size:.81rem;color:var(--muted);line-height:1.85}
+
+/* ── APPROACH BAND ── */
+.approach-band{padding:6rem 3rem;background:var(--warm);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);margin-top:4rem}
+.step{padding:2.4rem 2rem;border-right:1px solid var(--rule)}
+.step:last-child{border-right:none}
+.step-num{font-family:var(--serif);font-size:2.4rem;font-weight:400;color:rgba(15,26,20,.06);line-height:1;margin-bottom:1rem}
+.step-h{font-family:var(--serif);font-size:1.18rem;font-weight:400;line-height:1.25;margin-bottom:.65rem}
+.step-body{font-size:.8rem;color:var(--muted);line-height:1.85}
+
+/* ── FEATURED WORK ── */
+.featured{padding:6rem 3rem;background:var(--ink);color:#fff}
+.feat-h{font-family:var(--serif);font-size:clamp(1.9rem,3.4vw,2.9rem);font-weight:400;color:#fff}
+.feat-row{
+  display:grid;grid-template-columns:5.5rem 1fr 1.2rem;align-items:center;gap:2rem;
+  padding:1.5rem 0;border-bottom:1px solid rgba(255,255,255,.07);
+  cursor:pointer;transition:padding-left .22s
+}
+.feat-row:first-of-type{border-top:1px solid rgba(255,255,255,.07)}
+.feat-row:hover{padding-left:.6rem}
+.feat-cat{font-size:.56rem;letter-spacing:.15em;text-transform:uppercase;color:var(--amber)}
+.feat-name{font-family:var(--serif);font-size:1.28rem;font-weight:400;color:#fff;line-height:1.3}
+.feat-arr{color:rgba(255,255,255,.18);font-size:.85rem;transition:color .2s,transform .2s}
+.feat-row:hover .feat-arr{color:var(--amber);transform:translateX(4px)}
+
+/* ── BLOG STRIP ── */
+.blog-strip{padding:6rem 3rem;background:var(--canvas)}
+.bs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5rem;margin-top:4rem}
+.bs-card{border-top:2px solid var(--rule);padding-top:1.8rem;transition:border-color .25s}
+.bs-card:hover{border-color:var(--forest)}
+.bs-tag{font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:var(--forest);margin-bottom:.9rem;display:block}
+.bs-h{font-family:var(--serif);font-size:1.32rem;font-weight:400;line-height:1.28;margin-bottom:.65rem}
+.bs-by{font-size:.7rem;color:var(--muted);margin-bottom:.8rem}
+.bs-excerpt{font-size:.8rem;color:var(--muted);line-height:1.85}
+.bs-read{margin-top:1.15rem;display:block}
+
+/* ── SERVICES FULL PAGE ── */
+.svc-full{padding:5rem 3rem;max-width:1280px;margin:0 auto}
+.svc-full-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule);margin-top:4rem}
+.svc-full-card{padding:2.8rem 2.2rem;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);position:relative;overflow:hidden;transition:background .35s}
+.svc-full-card:nth-child(3n){border-right:none}
+.svc-full-card:nth-child(n+4){border-bottom:none}
+.svc-full-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--forest);transform:scaleX(0);transform-origin:left;transition:transform .38s}
+.svc-full-card:hover::before{transform:scaleX(1)}
+.svc-full-card:hover{background:var(--warm)}
+.svc-detail-band{padding:5rem 3rem;background:var(--mist)}
+.svc-detail-inner{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start;max-width:1280px;margin:0 auto}
+.sdl{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.15rem}
+.sdh{font-family:var(--serif);font-size:clamp(1.7rem,2.8vw,2.5rem);font-weight:400;line-height:1.15;margin-bottom:1.5rem}
+.sdh em{font-style:italic;color:var(--forest)}
+.sdb{font-size:.85rem;color:var(--muted);line-height:1.95}
+.sd-list{list-style:none;margin-top:1.2rem}
+.sd-list li{padding:.9rem 0;border-bottom:1px solid var(--rule);font-size:.82rem;color:var(--muted);line-height:1.75;display:flex;gap:.85rem}
+.sd-list li::before{content:'—';color:var(--forest);flex-shrink:0}
+
+/* ── APPROACH FULL ── */
+.approach-full{padding:5rem 3rem;max-width:1280px;margin:0 auto}
+.phase{display:grid;grid-template-columns:4rem 1fr;gap:2.5rem;padding:3.5rem 0;border-bottom:1px solid var(--rule);align-items:start}
+.phase:first-child{border-top:1px solid var(--rule)}
+.phase-num{font-family:var(--serif);font-size:2.8rem;font-weight:400;color:rgba(15,26,20,.07);line-height:1;margin-top:.1rem}
+.phase-tag-over{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--forest);display:block;margin-bottom:.75rem}
+.phase-h{font-family:var(--serif);font-size:clamp(1.6rem,2.4vw,2.2rem);font-weight:400;line-height:1.15;margin-bottom:.95rem}
+.phase-body{font-size:.85rem;color:var(--muted);line-height:1.95;max-width:58ch}
+.phase-body+.phase-body{margin-top:.8rem}
+.phase-pills{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.2rem}
+.pill{font-size:.57rem;letter-spacing:.07em;text-transform:uppercase;padding:.28rem .68rem;border:1px solid var(--rule);color:var(--muted)}
+
+/* VALUES SECTION */
+.values-sec{padding:5rem 3rem;background:var(--forest)}
+.values-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid rgba(255,255,255,.1);margin-top:4rem}
+.val-card{padding:2.5rem 2.2rem;border-right:1px solid rgba(255,255,255,.1)}
+.val-card:nth-child(3n){border-right:none}
+.val-icon{font-family:var(--serif);font-size:2rem;color:var(--amber);line-height:1;margin-bottom:.9rem}
+.val-name{font-family:var(--serif);font-size:1.35rem;font-weight:400;color:#fff;margin-bottom:.65rem}
+.val-desc{font-size:.8rem;color:rgba(255,255,255,.48);line-height:1.88}
+
+/* ── PROJECTS ── */
+.proj-full{padding:5rem 3rem;max-width:1280px;margin:0 auto}
+.filters{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:3rem}
+.filt{
+  font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:.36rem .85rem;border:1px solid var(--rule);background:transparent;
+  color:var(--muted);cursor:pointer;font-family:var(--body);transition:all .2s
+}
+.filt.on,.filt:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.proj-grid{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid var(--rule)}
+.proj-card{padding:2.8rem 2.5rem;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);position:relative;overflow:hidden;transition:background .3s}
+.proj-card:nth-child(2n){border-right:none}
+.proj-card:nth-last-child(-n+2){border-bottom:none}
+.proj-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .38s}
+.proj-card:hover::after{transform:scaleX(1)}
+.proj-card:hover{background:rgba(180,134,11,.04)}
+.proj-yr{position:absolute;top:2.2rem;right:2.2rem;font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(15,26,20,.18)}
+.proj-cat{font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:.95rem;display:block}
+.proj-title{font-family:var(--serif);font-size:1.48rem;font-weight:400;line-height:1.22;margin-bottom:.75rem}
+.proj-loc{font-size:.67rem;color:var(--forest);margin-bottom:.8rem;display:flex;align-items:center;gap:.35rem;letter-spacing:.04em}
+.proj-desc{font-size:.8rem;color:var(--muted);line-height:1.85}
+
+/* ── SUBNAV ── */
+.subnav{display:flex;border-bottom:1px solid var(--rule);padding:0 3rem;background:var(--canvas);position:sticky;top:64px;z-index:100}
+.sub-item{font-size:.62rem;letter-spacing:.13em;text-transform:uppercase;padding:.95rem 1.1rem;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+.sub-item:hover{color:var(--ink)}
+.sub-item.on{color:var(--ink);border-bottom-color:var(--forest)}
+
+/* ── PUBLICATIONS ── */
+.pub-page{padding:5rem 3rem;max-width:1280px;margin:0 auto}
+.pub-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule);margin-top:4rem}
+.pub-card{padding:2.4rem 2rem;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);position:relative;transition:background .3s;overflow:hidden}
+.pub-card:nth-child(3n){border-right:none}
+.pub-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--sage);transform:scaleX(0);transform-origin:left;transition:transform .38s}
+.pub-card:hover::before{transform:scaleX(1)}
+.pub-card:hover{background:var(--warm)}
+.pub-yr{position:absolute;top:1.9rem;right:1.8rem;font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(15,26,20,.18)}
+.pub-type{font-size:.54rem;letter-spacing:.18em;text-transform:uppercase;color:var(--sage);margin-bottom:.75rem;display:block}
+.pub-title{font-family:var(--serif);font-size:1.35rem;font-weight:400;line-height:1.22;margin-bottom:.65rem}
+.pub-author{font-size:.68rem;color:var(--gold);margin-bottom:.65rem}
+.pub-excerpt{font-size:.78rem;color:var(--muted);line-height:1.82}
+.pub-dl{display:inline-flex;align-items:center;gap:.42rem;margin-top:1.1rem;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);border-bottom:1px solid rgba(76,139,94,.28);padding-bottom:.15rem;cursor:pointer;transition:color .2s}
+.pub-dl:hover{color:var(--gold)}
+
+/* ── BLOG ── */
+.blog-page{padding:5rem 3rem;max-width:1280px;margin:0 auto}
+.blog-grid{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid var(--rule);margin-top:4rem}
+.blog-card{padding:3rem 2.6rem;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);position:relative;transition:background .3s;overflow:hidden}
+.blog-card:nth-child(2n){border-right:none}
+.blog-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--amber);transform:scaleX(0);transform-origin:left;transition:transform .38s}
+.blog-card:hover::after{transform:scaleX(1)}
+.blog-card:hover{background:rgba(212,160,23,.025)}
+.blog-date{position:absolute;top:2.3rem;right:2.4rem;font-size:.54rem;letter-spacing:.1em;color:rgba(15,26,20,.18)}
+.blog-tag{font-size:.54rem;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin-bottom:.8rem;display:block}
+.blog-h{font-family:var(--serif);font-size:1.52rem;font-weight:400;line-height:1.22;margin-bottom:.65rem}
+.blog-by{font-size:.68rem;color:var(--muted);margin-bottom:.85rem}
+.blog-excerpt{font-size:.79rem;color:var(--muted);line-height:1.85}
+.blog-read{margin-top:1.2rem;display:block}
+
+/* ── CONTACT ── */
+.contact-wrap{display:grid;grid-template-columns:1fr 1fr;gap:6rem;padding:5rem 3rem;max-width:1280px;margin:0 auto}
+.contact-h{font-family:var(--serif);font-size:clamp(2.5rem,4.2vw,3.8rem);font-weight:400;line-height:1.07;letter-spacing:-.02em;margin-bottom:1.7rem}
+.contact-h em{font-style:italic;color:var(--forest)}
+.contact-intro{font-size:.86rem;color:var(--muted);line-height:2;max-width:42ch}
+.deets{margin-top:2.8rem;display:flex;flex-direction:column;gap:2rem}
+.deet-label{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;display:block}
+.deet-val{font-size:.84rem;color:var(--ink);line-height:1.92}
+.deet-val a{color:var(--forest);text-decoration:none}
+.form{display:flex;flex-direction:column;gap:1rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.form-group{display:flex;flex-direction:column;gap:.32rem}
+.form-label{font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.form-field{
+  background:transparent;border:none;border-bottom:1px solid var(--rule);
+  padding:.6rem 0;font-family:var(--body);font-size:.88rem;font-weight:300;
+  color:var(--ink);outline:none;transition:border-color .22s;width:100%
+}
+.form-field:focus{border-color:var(--forest)}
+.form-textarea{resize:none;height:88px}
+.form-btn{
+  margin-top:.3rem;background:var(--ink);color:#fff;border:none;
+  padding:.88rem 2.2rem;font-family:var(--body);font-size:.66rem;
+  letter-spacing:.14em;text-transform:uppercase;cursor:pointer;
+  display:inline-flex;align-items:center;gap:.6rem;transition:background .25s
+}
+.form-btn:hover{background:var(--forest)}
+.form-btn-arr{transition:transform .22s}
+.form-btn:hover .form-btn-arr{transform:translateX(4px)}
+.offices{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule);margin:0 3rem 5rem}
+.off-cell{padding:2.2rem 2rem;border-right:1px solid var(--rule)}
+.off-cell:last-child{border-right:none}
+.off-tag{font-size:.52rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.65rem;display:block}
+.off-city{font-family:var(--serif);font-size:1.48rem;font-weight:400;margin-bottom:.65rem}
+.off-text{font-size:.78rem;color:var(--muted);line-height:1.9}
+
+/* ── FOOTER ── */
+.site-footer{
+  background:var(--ink);color:rgba(255,255,255,.32);
+  padding:2.1rem 3rem;display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid rgba(255,255,255,.05)
+}
+.footer-brand{display:flex;align-items:center;gap:.65rem}
+.footer-mark{width:22px;height:22px}
+.footer-copy{font-size:.62rem;letter-spacing:.04em}
+.footer-nav{display:flex;gap:1.7rem;list-style:none}
+.footer-nav a{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.26);cursor:pointer;transition:color .2s}
+.footer-nav a:hover{color:var(--amber)}
+
+/* ── KEYFRAMES ── */
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes belt{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .hero,.about,.pg-banner{grid-template-columns:1fr}
+  .hero-r{display:none}
+  .svc-grid,.svc-full-grid,.values-grid,.steps,.offices{grid-template-columns:1fr 1fr}
+  .svc-card:nth-child(3n),.svc-full-card:nth-child(3n),.val-card:nth-child(3n),.step:last-child{border-right:1px solid var(--rule)}
+  .svc-card:nth-child(2n),.svc-full-card:nth-child(2n),.val-card:nth-child(2n),.step:nth-child(2n){border-right:none}
+  .contact-wrap,.svc-detail-inner{grid-template-columns:1fr}
+  .pub-grid{grid-template-columns:1fr 1fr}
+  .pub-card:nth-child(3n){border-right:1px solid var(--rule)}
+  .pub-card:nth-child(2n){border-right:none}
+}
+@media(max-width:720px){
+  .site-nav{padding:0 1.4rem}
+  .nav-link{padding:.4rem .5rem;font-size:.6rem}
+  .wrap,.svc-preview,.featured,.blog-strip,.approach-band,.svc-full,.approach-full,.values-sec,.proj-full,.pub-page,.blog-page,.contact-wrap,.svc-detail-band,.svc-detail-inner{padding-left:1.4rem;padding-right:1.4rem}
+  .svc-grid,.svc-full-grid,.proj-grid,.blog-grid,.values-grid,.steps,.pub-grid,.bs-grid{grid-template-columns:1fr}
+  .svc-card,.svc-full-card,.proj-card,.blog-card,.val-card,.step,.pub-card{border-right:none}
+  .about{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .offices{grid-template-columns:1fr;margin:0 1.4rem 3rem}
+  .off-cell{border-right:none;border-bottom:1px solid var(--rule)}
+  .off-cell:last-child{border-bottom:none}
+  .form-row{grid-template-columns:1fr}
+  .site-footer{flex-direction:column;gap:1.2rem;align-items:flex-start;padding:2rem 1.4rem}
+  .subnav{padding:0 1.4rem}
+  .pg-banner{padding:5rem 1.4rem 3.5rem;grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ NAV ══════ -->
+<nav class="site-nav" id="siteNav">
+  <div class="brand" onclick="go('home')">
+    <svg class="brand-mark" viewBox="0 0 30 30" fill="none">
+      <circle cx="15" cy="15" r="13.5" stroke="#1A5C34" stroke-width="1.3"/>
+      <line x1="15" y1="1.5" x2="15" y2="7" stroke="#B8860B" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="15" y1="23" x2="15" y2="28.5" stroke="#B8860B" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="1.5" y1="15" x2="7" y2="15" stroke="#B8860B" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="23" y1="15" x2="28.5" y2="15" stroke="#B8860B" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="5.4" y1="5.4" x2="9.5" y2="9.5" stroke="#B8860B" stroke-width="1.1" stroke-linecap="round"/>
+      <line x1="24.6" y1="24.6" x2="20.5" y2="20.5" stroke="#B8860B" stroke-width="1.1" stroke-linecap="round"/>
+      <line x1="24.6" y1="5.4" x2="20.5" y2="9.5" stroke="#B8860B" stroke-width="1.1" stroke-linecap="round"/>
+      <line x1="5.4" y1="24.6" x2="9.5" y2="20.5" stroke="#B8860B" stroke-width="1.1" stroke-linecap="round"/>
+      <circle cx="15" cy="15" r="5" stroke="#1A5C34" stroke-width="1.1"/>
+      <circle cx="15" cy="15" r="1.9" fill="#B8860B"/>
+    </svg>
+    <div class="brand-text">
+      <span class="brand-name">Community Resource Systems</span>
+      <span class="brand-sub">Ghana</span>
+    </div>
+  </div>
+  <ul class="nav-menu">
+    <li class="nav-item">
+      <span class="nav-link" onclick="go('services')" data-pg="services">Services <span class="nav-caret">▾</span></span>
+      <div class="dropdown">
+        <a onclick="go('services')">All Services</a>
+        <a onclick="go('services')">Research &amp; Evaluation</a>
+        <a onclick="go('services')">Strategy &amp; Leadership</a>
+        <a onclick="go('services')">Capability Strengthening</a>
+        <a onclick="go('services')">Community Facilitation</a>
+        <a onclick="go('services')">Livelihoods &amp; Inclusion</a>
+        <a onclick="go('services')">Policy &amp; Governance</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link" onclick="go('approach')" data-pg="approach">Approach <span class="nav-caret">▾</span></span>
+      <div class="dropdown">
+        <a onclick="go('approach')">Our Method</a>
+        <a onclick="go('approach-values')">Values</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link" onclick="go('projects')" data-pg="projects">Projects <span class="nav-caret">▾</span></span>
+      <div class="dropdown">
+        <a onclick="go('projects')">All Projects</a>
+        <a onclick="go('projects');filt('livelihoods')">Livelihoods</a>
+        <a onclick="go('projects');filt('health')">Health</a>
+        <a onclick="go('projects');filt('governance')">Governance</a>
+        <a onclick="go('projects');filt('youth')">Youth</a>
+        <a onclick="go('projects');filt('gender')">Gender</a>
+        <a onclick="go('projects');filt('environment')">Environment</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link" onclick="go('publications')" data-pg="publications">Publications <span class="nav-caret">▾</span></span>
+      <div class="dropdown">
+        <a onclick="go('publications');sub('pub','all')">All Publications</a>
+        <a onclick="go('publications');sub('pub','reports')">Reports</a>
+        <a onclick="go('publications');sub('pub','working-papers')">Working Papers</a>
+        <a onclick="go('publications');sub('pub','policy-briefs')">Policy Briefs</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link" onclick="go('blog')" data-pg="blog">Blog <span class="nav-caret">▾</span></span>
+      <div class="dropdown">
+        <a onclick="go('blog');sub('blog','all')">All Posts</a>
+        <a onclick="go('blog');sub('blog','articles')">Articles</a>
+        <a onclick="go('blog');sub('blog','field-notes')">Field Notes</a>
+        <a onclick="go('blog');sub('blog','news')">News &amp; Updates</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link" onclick="go('contact')" data-pg="contact">Contact</span>
+    </li>
+  </ul>
+</nav>
+
+<!-- ══════════════════ PAGE: HOME ══════════════════ -->
+<div class="pg show" id="pg-home">
+  <section class="hero">
+    <div class="hero-l">
+      <span class="hero-eyebrow">Social Development Practice · Ghana</span>
+      <h1 class="hero-h">Building<br><em>systems</em><br>that last.</h1>
+      <p class="hero-lead">We work alongside communities, government, and civil society to strengthen the social and institutional systems that determine whether people truly thrive.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="go('services')">Explore Our Work</button>
+        <span class="cta" onclick="go('approach')">How we work →</span>
+      </div>
+    </div>
+    <div class="hero-r">
+      <svg class="hero-svg" viewBox="0 0 340 340" fill="none">
+        <circle cx="170" cy="170" r="152" stroke="rgba(26,92,52,.11)" stroke-width="1"/>
+        <circle cx="170" cy="170" r="116" stroke="rgba(184,134,11,.25)" stroke-width="1.1"/>
+        <circle cx="170" cy="170" r="72" stroke="rgba(26,92,52,.16)" stroke-width="1"/>
+        <circle cx="170" cy="170" r="28" stroke="rgba(184,134,11,.52)" stroke-width="1.3"/>
+        <circle cx="170" cy="170" r="9" fill="#B8860B" opacity=".8"/>
+        <circle cx="170" cy="170" r="3.5" fill="#1A5C34"/>
+        <line x1="170" y1="18" x2="170" y2="98" stroke="rgba(184,134,11,.6)" stroke-width="1.4"/>
+        <line x1="170" y1="242" x2="170" y2="322" stroke="rgba(184,134,11,.6)" stroke-width="1.4"/>
+        <line x1="18" y1="170" x2="98" y2="170" stroke="rgba(184,134,11,.6)" stroke-width="1.4"/>
+        <line x1="242" y1="170" x2="322" y2="170" stroke="rgba(184,134,11,.6)" stroke-width="1.4"/>
+        <line x1="62" y1="62" x2="118" y2="118" stroke="rgba(184,134,11,.38)" stroke-width="1"/>
+        <line x1="278" y1="278" x2="222" y2="222" stroke="rgba(184,134,11,.38)" stroke-width="1"/>
+        <line x1="278" y1="62" x2="222" y2="118" stroke="rgba(184,134,11,.38)" stroke-width="1"/>
+        <line x1="62" y1="278" x2="118" y2="222" stroke="rgba(184,134,11,.38)" stroke-width="1"/>
+        <circle cx="170" cy="18" r="5" fill="#B8860B" opacity=".85"/>
+        <circle cx="170" cy="322" r="5" fill="#B8860B" opacity=".85"/>
+        <circle cx="18" cy="170" r="5" fill="#B8860B" opacity=".85"/>
+        <circle cx="322" cy="170" r="5" fill="#B8860B" opacity=".85"/>
+        <circle cx="62" cy="62" r="3.8" fill="#B8860B" opacity=".58"/>
+        <circle cx="278" cy="278" r="3.8" fill="#B8860B" opacity=".58"/>
+        <circle cx="278" cy="62" r="3.8" fill="#B8860B" opacity=".58"/>
+        <circle cx="62" cy="278" r="3.8" fill="#B8860B" opacity=".58"/>
+        <polygon points="170,18 278,62 322,170 278,278 170,322 62,278 18,170 62,62" stroke="rgba(26,92,52,.1)" stroke-width="1" fill="none"/>
+        <path d="M170 140 Q186 156 170 170 Q154 156 170 140" stroke="rgba(184,134,11,.45)" stroke-width="1.7" fill="none"/>
+        <path d="M170 200 Q186 184 170 170 Q154 184 170 200" stroke="rgba(184,134,11,.45)" stroke-width="1.7" fill="none"/>
+        <path d="M140 170 Q156 154 170 170 Q156 186 140 170" stroke="rgba(184,134,11,.45)" stroke-width="1.7" fill="none"/>
+        <path d="M200 170 Q184 154 170 170 Q184 186 200 170" stroke="rgba(184,134,11,.45)" stroke-width="1.7" fill="none"/>
+      </svg>
+      <div class="kente"></div>
+    </div>
+  </section>
+
+  <div class="ticker">
+    <div class="ticker-belt">
+      <span class="ticker-item">Community Development</span><span class="ticker-item">Research &amp; Evaluation</span><span class="ticker-item">Policy &amp; Governance</span><span class="ticker-item">Livelihoods &amp; Economic Inclusion</span><span class="ticker-item">Youth Empowerment</span><span class="ticker-item">Gender Equity</span><span class="ticker-item">Health Systems</span><span class="ticker-item">Capability Strengthening</span><span class="ticker-item">Workshop Facilitation</span><span class="ticker-item">Scaling Social Impact</span>
+      <span class="ticker-item">Community Development</span><span class="ticker-item">Research &amp; Evaluation</span><span class="ticker-item">Policy &amp; Governance</span><span class="ticker-item">Livelihoods &amp; Economic Inclusion</span><span class="ticker-item">Youth Empowerment</span><span class="ticker-item">Gender Equity</span><span class="ticker-item">Health Systems</span><span class="ticker-item">Capability Strengthening</span><span class="ticker-item">Workshop Facilitation</span><span class="ticker-item">Scaling Social Impact</span>
+    </div>
+  </div>
+
+  <div class="about">
+    <div class="about-l">
+      <div><p class="about-over">Who We Are</p><h2 class="about-h r">Built from<br><em>Ghanaian soil.</em></h2></div>
+      <div class="stat-grid">
+        <div class="stat-cell r"><span class="stat-n">200+</span><span class="stat-l">Communities</span></div>
+        <div class="stat-cell r"><span class="stat-n">85+</span><span class="stat-l">Partners</span></div>
+        <div class="stat-cell r"><span class="stat-n">60+</span><span class="stat-l">Programmes</span></div>
+        <div class="stat-cell r"><span class="stat-n">10</span><span class="stat-l">Regions</span></div>
+      </div>
+    </div>
+    <div class="about-r">
+      <p class="about-p r">Community Resource Systems (CRS) is a Ghanaian social development organisation working at the intersection of community knowledge, institutional capacity, and systemic change. We support communities and organisations to turn evidence-based ideas into practical, impactful action.</p>
+      <p class="about-p r">Our flexible approach means we tailor our support to the unique needs of our partners — whether it is co-designing programmes, building leadership, measuring impact, or facilitating community-led change. We believe lasting development is built from within, not delivered from outside.</p>
+      <span class="cta cta-inv r" style="margin-top:1.7rem" onclick="go('approach')">How we work →</span>
+    </div>
+  </div>
+
+  <section class="svc-preview">
+    <div class="section-header r"><h2 class="section-h">Our Services</h2><span class="cta" onclick="go('services')">All services →</span></div>
+    <div class="svc-grid">
+      <div class="svc-card r"><span class="svc-n">01</span><h3 class="svc-name">Research &amp; Evaluation</h3><p class="svc-desc">Rigorous, contextually sensitive research generating evidence that speaks to Ghanaian realities — informing decision-making at community, district, and national levels.</p></div>
+      <div class="svc-card r"><span class="svc-n">02</span><h3 class="svc-name">Strategy &amp; Leadership</h3><p class="svc-desc">Supporting NGOs, government bodies, and CBOs across Ghana to develop strategies grounded in local context and accountable to those they serve.</p></div>
+      <div class="svc-card r"><span class="svc-n">03</span><h3 class="svc-name">Capability Strengthening</h3><p class="svc-desc">From District Assemblies to national institutions, we build the skills and institutional capacity to sustain impact long after our engagement ends.</p></div>
+      <div class="svc-card r"><span class="svc-n">04</span><h3 class="svc-name">Community Facilitation</h3><p class="svc-desc">Participatory methods refined across Ghana's diverse communities — creating spaces where people drive their own development as architects of change.</p></div>
+      <div class="svc-card r"><span class="svc-n">05</span><h3 class="svc-name">Livelihoods &amp; Inclusion</h3><p class="svc-desc">Livelihood programmes addressing structural inequity — focusing on women, youth, persons with disabilities, and marginalised populations across Ghana.</p></div>
+      <div class="svc-card r"><span class="svc-n">06</span><h3 class="svc-name">Policy &amp; Governance</h3><p class="svc-desc">Translating evidence into policy with Ghana's ministries and development partners — building governance systems that are responsive, equitable, and durable.</p></div>
+    </div>
+  </section>
+
+  <section class="approach-band">
+    <div style="max-width:1280px;margin:0 auto">
+      <div class="section-header r"><h2 class="section-h">How We Work</h2><span class="cta" onclick="go('approach')">Full approach →</span></div>
+      <div class="steps">
+        <div class="step r"><div class="step-num">I</div><h3 class="step-h">Begin With Community</h3><p class="step-body">We enter every engagement with deep listening and humility — understanding what already exists before designing anything new.</p></div>
+        <div class="step r"><div class="step-num">II</div><h3 class="step-h">Co-design With Partners</h3><p class="step-body">Genuine partnership with communities, government, and civil society to develop contextually grounded approaches.</p></div>
+        <div class="step r"><div class="step-num">III</div><h3 class="step-h">Act, Learn, Adjust</h3><p class="step-body">Adaptive monitoring and real-time learning built into every programme — with the courage to change course when evidence demands it.</p></div>
+        <div class="step r"><div class="step-num">IV</div><h3 class="step-h">Leave Lasting Capacity</h3><p class="step-body">Every engagement ends with a deliberate transition that ensures communities lead what comes next.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="featured">
+    <div style="max-width:1280px;margin:0 auto">
+      <div class="section-header r" style="border-color:rgba(255,255,255,.07)"><h2 class="feat-h">Selected Work</h2><span class="cta cta-inv" onclick="go('projects')">All projects →</span></div>
+      <div onclick="go('projects')" class="feat-row r"><span class="feat-cat">Livelihoods</span><h3 class="feat-name">Smallholder Farmer Inclusion Programme — Upper East &amp; West Regions</h3><span class="feat-arr">→</span></div>
+      <div onclick="go('projects')" class="feat-row r"><span class="feat-cat">Health</span><h3 class="feat-name">Community Health Systems Strengthening — Ashanti &amp; Bono Regions</h3><span class="feat-arr">→</span></div>
+      <div onclick="go('projects')" class="feat-row r"><span class="feat-cat">Youth</span><h3 class="feat-name">Youth Leadership &amp; Civic Agency — Greater Accra Urban Programme</h3><span class="feat-arr">→</span></div>
+      <div onclick="go('projects')" class="feat-row r"><span class="feat-cat">Governance</span><h3 class="feat-name">District Assembly Capacity Building — Local Government Reform</h3><span class="feat-arr">→</span></div>
+    </div>
+  </section>
+
+  <section class="blog-strip">
+    <div style="max-width:1280px;margin:0 auto">
+      <div class="section-header r"><h2 class="section-h">From the Blog</h2><span class="cta" onclick="go('blog')">All posts →</span></div>
+      <div class="bs-grid">
+        <div class="bs-card r"><span class="bs-tag">Article</span><h3 class="bs-h">Why Community-Led Development Still Matters</h3><p class="bs-by">Dr. Abena Asante · February 2026</p><p class="bs-excerpt">Thirty years in this work has only deepened my conviction that the most durable change happens when communities lead it — not because it is a nice idea, but because the evidence consistently shows it works.</p><span class="bs-read cta" onclick="go('blog')">Read more →</span></div>
+        <div class="bs-card r"><span class="bs-tag">Field Notes</span><h3 class="bs-h">Listening in the Upper East: Notes from the Field</h3><p class="bs-by">Kwame Acheampong · January 2026</p><p class="bs-excerpt">Three weeks in Bolgatanga, sitting with farmers, market women, and district officials — trying to understand what the data couldn't tell us. What I found challenged several assumptions.</p><span class="bs-read cta" onclick="go('blog')">Read more →</span></div>
+        <div class="bs-card r"><span class="bs-tag">Article</span><h3 class="bs-h">The Problem With "Best Practices"</h3><p class="bs-by">Efua Darko · November 2025</p><p class="bs-excerpt">The development sector loves best practices. But when you sit in Volta Region and try to apply what worked somewhere else — things get complicated fast. Context is everything.</p><span class="bs-read cta" onclick="go('blog')">Read more →</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-brand"><svg class="footer-mark" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="13.5" stroke="rgba(184,134,11,.38)" stroke-width="1.3"/><circle cx="15" cy="15" r="5" stroke="rgba(184,134,11,.38)" stroke-width="1.1"/><circle cx="15" cy="15" r="1.9" fill="rgba(184,134,11,.55)"/></svg><span class="footer-copy">© 2026 Community Resource Systems, Ghana.</span></div>
+    <ul class="footer-nav"><li><a onclick="go('services')">Services</a></li><li><a onclick="go('publications')">Publications</a></li><li><a onclick="go('blog')">Blog</a></li><li><a onclick="go('contact')">Contact</a></li></ul>
+  </footer>
+</div>
+
+<!-- ══════════════════ PAGE: SERVICES ══════════════════ -->
+<div class="pg" id="pg-services">
+  <div class="pg-banner"><div><span class="pg-banner-eyebrow">What We Do</span><h1 class="pg-banner-h">Services built for<br><em>Ghanaian realities.</em></h1></div><p class="pg-banner-body">Our services are not off-the-shelf. Every engagement is shaped by context, driven by community knowledge, and measured by outcomes that matter to the people we serve across Ghana.</p></div>
+  <div class="svc-full">
+    <div class="svc-full-grid">
+      <div class="svc-full-card r"><span class="svc-n">01</span><h3 class="svc-name">Research &amp; Evaluation</h3><p class="svc-desc">We design rigorous, contextually sensitive research that generates evidence speaking to Ghanaian realities — informing decision-making at community, district, and national levels. We specialise in participatory, mixed-method approaches that integrate community knowledge with quantitative evidence.</p></div>
+      <div class="svc-full-card r"><span class="svc-n">02</span><h3 class="svc-name">Strategy &amp; Leadership</h3><p class="svc-desc">We support NGOs, government bodies, and CBOs across Ghana to develop strategies grounded in local context and accountable to those they serve. We facilitate strategic planning, organisational review, and leadership development for institutions at every level.</p></div>
+      <div class="svc-full-card r"><span class="svc-n">03</span><h3 class="svc-name">Capability Strengthening</h3><p class="svc-desc">From District Assemblies to national institutions, we build the skills, knowledge, and institutional capacity to sustain impact long after our engagement ends. Training, mentoring, and embedded advisory support delivered with a commitment to local ownership.</p></div>
+      <div class="svc-full-card r"><span class="svc-n">04</span><h3 class="svc-name">Community Facilitation</h3><p class="svc-desc">Participatory methods refined across Ghana's diverse communities — creating spaces where people drive their own development as architects, not beneficiaries, of change. We facilitate community planning, dialogue, visioning, and conflict transformation processes.</p></div>
+      <div class="svc-full-card r"><span class="svc-n">05</span><h3 class="svc-name">Livelihoods &amp; Inclusion</h3><p class="svc-desc">We design and evaluate livelihood programmes addressing structural inequity — with focus on women, youth, persons with disabilities, and marginalised populations across Ghana. Market systems development, enterprise support, and financial inclusion strategies.</p></div>
+      <div class="svc-full-card r"><span class="svc-n">06</span><h3 class="svc-name">Policy &amp; Governance</h3><p class="svc-desc">We work with Ghana's ministries, development partners, and district authorities to translate evidence into policy — building governance systems that are responsive, equitable, and durable. Policy analysis, reform facilitation, and stakeholder engagement.</p></div>
+    </div>
+  </div>
+  <div class="svc-detail-band">
+    <div class="svc-detail-inner">
+      <div><p class="sdl">How We Deliver</p><h2 class="sdh r">Tailored to context.<br><em>Not a template.</em></h2><p class="sdb r">We do not offer pre-packaged programmes. Each engagement begins with listening — to your community, your data, your constraints. We then co-design the right combination of services for your specific goals.</p></div>
+      <ul class="sd-list">
+        <li class="r">Organisational assessments and needs analysis tailored to your institutional context</li>
+        <li class="r">Co-designed monitoring, evaluation, and learning (MEL) frameworks</li>
+        <li class="r">Long-term embedded support — not short-term consultancy visits</li>
+        <li class="r">Training and mentoring for local staff and community facilitators</li>
+        <li class="r">Policy briefs, reports, and communications for diverse audiences</li>
+        <li class="r">Partnership brokering with government bodies, NGOs, and funders</li>
+      </ul>
+    </div>
+  </div>
+  <footer class="site-footer"><div class="footer-brand"><svg class="footer-mark" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="13.5" stroke="rgba(184,134,11,.38)" stroke-width="1.3"/><circle cx="15" cy="15" r="5" stroke="rgba(184,134,11,.38)" stroke-width="1.1"/><circle cx="15" cy="15" r="1.9" fill="rgba(184,134,11,.55)"/></svg><span class="footer-copy">© 2026 Community Resource Systems, Ghana.</span></div><ul class="footer-nav"><li><a onclick="go('approach')">Approach</a></li><li><a onclick="go('projects')">Projects</a></li><li><a onclick="go('contact')">Contact</a></li></ul></footer>
+</div>
+
+<!-- ══════════════════ PAGE: APPROACH ══════════════════ -->
+<div class="pg" id="pg-approach">
+  <div class="pg-banner"><div><span class="pg-banner-eyebrow">How We Work</span><h1 class="pg-banner-h">Locally rooted.<br><em>Evidence-led.</em></h1></div><p class="pg-banner-body">Our approach is not a formula. It is a set of deeply held commitments about how change happens — and who leads it. Lasting development is built from within communities, not delivered to them.</p></div>
+  <div class="approach-full">
+    <div class="section-header r" style="margin-bottom:0"><h2 class="section-h">Our Four Phases</h2><span style="font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)">The CRS Method</span></div>
+    <div class="phase r"><div class="phase-num">I</div><div><span class="phase-tag-over">Entry &amp; Orientation</span><h3 class="phase-h">Begin With Community</h3><p class="phase-body">Every engagement starts with deep listening. We enter with humility — not with a predetermined framework, but with genuine commitment to understanding what is already present: the strengths, networks, tensions, and aspirations that exist long before we arrive.</p><p class="phase-body">This means time on the ground. Conversations with elders, youth, women's groups, market traders, teachers, and local officials. We do not begin designing until we understand.</p><div class="phase-pills"><span class="pill">Stakeholder Mapping</span><span class="pill">Community Listening</span><span class="pill">Contextual Analysis</span><span class="pill">Power Assessment</span></div></div></div>
+    <div class="phase r"><div class="phase-num">II</div><div><span class="phase-tag-over">Design &amp; Planning</span><h3 class="phase-h">Co-design With Partners</h3><p class="phase-body">We work in genuine partnership — with community members, traditional authorities, local government, and civil society — to develop approaches that reflect Ghanaian knowledge systems and institutional realities.</p><p class="phase-body">Co-design is not a workshop. It is an ongoing, iterative process of dialogue, testing ideas, revising plans, and building shared ownership of what comes next.</p><div class="phase-pills"><span class="pill">Participatory Design</span><span class="pill">Theory of Change</span><span class="pill">MEL Framework</span><span class="pill">Risk Mapping</span></div></div></div>
+    <div class="phase r"><div class="phase-num">III</div><div><span class="phase-tag-over">Implementation &amp; Adaptation</span><h3 class="phase-h">Act, Learn, Adjust</h3><p class="phase-body">Ghana's social and political contexts are dynamic. We build adaptive monitoring and real-time learning into every programme — not as add-ons, but as central to how we work.</p><p class="phase-body">Regular sense-making sessions with partners, rapid feedback loops with communities, and the institutional courage to change course when evidence demands it.</p><div class="phase-pills"><span class="pill">Adaptive Management</span><span class="pill">Real-time Data</span><span class="pill">Community Feedback</span><span class="pill">Iterative Evaluation</span></div></div></div>
+    <div class="phase r"><div class="phase-num">IV</div><div><span class="phase-tag-over">Exit &amp; Sustainability</span><h3 class="phase-h">Leave Lasting Capacity</h3><p class="phase-body">Our measure of success is not what we deliver — it is what communities and institutions can sustain, lead, and grow long after our direct engagement ends.</p><p class="phase-body">We build for permanence, not dependency. Every engagement includes a deliberate transition plan developed with — not for — our partners.</p><div class="phase-pills"><span class="pill">Transition Planning</span><span class="pill">Skills Transfer</span><span class="pill">Systems Embedding</span><span class="pill">Final Evaluation</span></div></div></div>
+  </div>
+  <footer class="site-footer"><div class="footer-brand"><svg class="footer-mark" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="13.5" stroke="rgba(184,134,11,.38)" stroke-width="1.3"/><circle cx="15" cy="15" r="5" stroke="rgba(184,134,11,.38)" stroke-width="1.1"/><circle cx="15" cy="15" r="1.9" fill="rgba(184,134,11,.55)"/></svg><span class="footer-copy">© 2026 Community Resource Systems, Ghana.</span></div><ul class="footer-nav"><li><a onclick="go('approach-values')">Values</a></li><li><a onclick="go('services')">Services</a></li><li><a onclick="go('contact')">Contact</a></li></ul></footer>
+</div>
+
+<!-- ══════════════════ PAGE: VALUES ══════════════════ -->
+<div class="pg" id="pg-approach-values">
+  <div class="pg-banner"><div><span class="pg-banner-eyebrow">Approach — Values</span><h1 class="pg-banner-h">What we<br><em>stand for.</em></h1></div><p class="pg-banner-body">Our values are not aspirational statements. They are the commitments that shape every decision we make — who we partner with, how we engage, and what we are willing to say out loud.</p></div>
+  <div class="values-sec">
+    <div style="max-width:1280px;margin:0 auto">
+      <div class="section-header r" style="border-color:rgba(255,255,255,.1);margin-bottom:0"><h2 class="section-h" style="color:#fff">Our Six Commitments</h2></div>
+      <div class="values-grid">
+        <div class="val-card r"><div class="val-icon">Ɔ</div><h3 class="val-name">Community First</h3><p class="val-desc">Communities are not the objects of development — they are its authors. Every decision we make is measured against: does this serve the people most directly affected?</p></div>
+        <div class="val-card r"><div class="val-icon">◎</div><h3 class="val-name">Evidence &amp; Honesty</h3><p class="val-desc">We follow the evidence, even when inconvenient. We tell our partners what we find, not what they want to hear. Rigour without honesty is performance — not development.</p></div>
+        <div class="val-card r"><div class="val-icon">⊕</div><h3 class="val-name">Genuine Partnership</h3><p class="val-desc">We share risk, learn together, and remain accountable to the communities our work touches. We are partners who stay — not consultants who visit.</p></div>
+        <div class="val-card r"><div class="val-icon">△</div><h3 class="val-name">Equity &amp; Inclusion</h3><p class="val-desc">We actively work to surface and address power imbalances — within communities, within organisations, and within the systems we seek to change.</p></div>
+        <div class="val-card r"><div class="val-icon">∞</div><h3 class="val-name">Sustainability</h3><p class="val-desc">We build for the long term. Every programme is designed with exit in mind — transferring skills, embedding systems, and strengthening local structures that outlast us.</p></div>
+        <div class="val-card r"><div class="val-icon">◇</div><h3 class="val-name">Contextual Humility</h3><p class="val-desc">Ghana is not a monolith. What works in one community may not work in another. We approach every context with curiosity and the willingness to unlearn and begin again.</p></div>
+      </div>
+    </div>
+  </div>
+  <footer class="site-footer"><div class="footer-brand"><svg class="footer-mark" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="13.5" stroke="rgba(184,134,11,.38)" stroke-width="1.3"/><circle cx="15" cy="15" r="5" stroke="rgba(184,134,11,.38)" stroke-width="1.1"/><circle cx="15" cy="15" r="1.9" fill="rgba(184,134,11,.55)"/></svg><span class="footer-copy">© 2026 Community Resource Systems, Ghana.</span></div><ul class="footer-nav"><li><a onclick="go('approach')">Our Method</a></li><li><a onclick="go('services')">Services</a></li><li><a onclick="go('contact')">Contact</a></li></ul></footer>
+</div>
+
+<!-- ══════════════════ PAGE: PROJECTS ══════════════════ -->
+<div class="pg" id="pg-projects">
+  <div class="pg-banner"><div><span class="pg-banner-eyebrow">Our Work</span><h1 class="pg-banner-h">Work that speaks<br><em>for itself.</em></h1></div><p class="pg-banner-body">Across Ghana — from coastal fishing communities to urban centres to smallholder farms in the north — our projects are as varied as the communities they serve.</p></div>
+  <div class="proj-full">
+    <div class="filters r">
+      <button class="filt on" onclick="filt('all',this)">All</button>
+      <button class="filt" onclick="filt('livelihoods',this)">Livelihoods</button>
+      <button class="filt" onclick="filt('health',this)">Health</button>
+      <button class="filt" onclick="filt('governance',this)">Governance</button>
+      <button class="filt" onclick="filt('youth',this)">Youth</button>
+      <button class="filt" onclick="filt('gender',this)">Gender</button>
+      <button class="filt" onclick="filt('environment',this)">Environment</button>
+    </div>
+    <div class="proj-grid" id="projGrid">
+      <div class="proj-card r" data-cat="livelihoods"><span class="proj-yr">2022–2025</span><span class="proj-cat">Livelihoods</span><h3 class="proj-title">Smallholder Farmer Inclusion Programme</h3><p class="proj-loc">◎ Upper East &amp; Upper West Regions</p><p class="proj-desc">Strengthening market access, cooperative structures, and financial literacy for smallholder farming families — with focus on women-led households and climate-adaptive practices.</p></div>
+      <div class="proj-card r" data-cat="health"><span class="proj-yr">2021–2024</span><span class="proj-cat">Health Systems</span><h3 class="proj-title">Community Health Systems Strengthening</h3><p class="proj-loc">◎ Ashanti &amp; Bono Regions</p><p class="proj-desc">Building capacity of community health workers, CHPS compounds, and district health teams to deliver integrated primary care with community oversight mechanisms.</p></div>
+      <div class="proj-card r" data-cat="youth"><span class="proj-yr">2023–2026</span><span class="proj-cat">Youth</span><h3 class="proj-title">Youth Leadership &amp; Civic Agency</h3><p class="proj-loc">◎ Greater Accra Region</p><p class="proj-desc">Supporting young people in urban areas to develop civic skills, engage local government, and build peer-led advocacy networks in their own communities.</p></div>
+      <div class="proj-card r" data-cat="governance"><span class="proj-yr">2020–2023</span><span class="proj-cat">Governance</span><h3 class="proj-title">District Assembly Capacity Building</h3><p class="proj-loc">◎ Central &amp; Western Regions</p><p class="proj-desc">Supporting District Assemblies to improve participatory planning, citizen engagement, and revenue mobilisation — strengthening Ghana's decentralisation system.</p></div>
+      <div class="proj-card r" data-cat="gender"><span class="proj-yr">2022–2025</span><span class="proj-cat">Gender Equity</span><h3 class="proj-title">Women's Economic Networks</h3><p class="proj-loc">◎ Volta &amp; Oti Regions</p><p class="proj-desc">Establishing and strengthening women-led savings and enterprise groups, linking them to formal financial services and building sustainable peer support structures.</p></div>
+      <div class="proj-card r" data-cat="environment"><span class="proj-yr">2023–2026</span><span class="proj-cat">Environment</span><h3 class="proj-title">Climate-Resilient Community Planning</h3><p class="proj-loc">◎ Northern Region</p><p class="proj-desc">Integrating climate risk into community development plans in the northern savanna — building local adaptation strategies grounded in indigenous environmental knowledge.</p></div>
+    </div>
+  </div>
+  <footer class="site-footer"><div class="footer-brand"><svg class="footer-mark" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="13.5" stroke="rgba(184,134,11,.38)" stroke-width="1.3"/><circle cx="15" cy="15" r="5" stroke="rgba(184,134,11,.38)" stroke-width="1.1"/><circle cx="15" cy="15" r="1.9" fill="rgba(184,134,11,.55)"/></svg><span class="footer-copy">© 2026 Community Resource Systems, Ghana.</span></div><ul class="footer-nav"><li><a onclick="go('services')">Services</a></li><li><a onclick="go('approach')">Approach</a></li><li><a onclick="go('contact')">Contact</a></li></ul></footer>
+</div>
+
+<!-- ══════════════════ PAGE: PUBLICATIONS ══════════════════ -->
+<div class="pg" id="pg-publications">
+  <div class="pg-banner"><div><span class="pg-banner-eyebrow">Knowledge &amp; Evidence</span><h1 class="pg-banner-h">Our<br><em>Publications.</em></h1></div><p class="pg-banner-body">We believe evidence should be accessible. Our publications — from full research reports to concise policy briefs — are freely available to practitioners, government, and communities across Ghana.</p></div>
+  <div class="subnav" id="pubNav">
+    <span class="sub-item on" onclick="sub('pub','all',this)">All Publications</span>
+    <span class="sub-item" onclick="sub('pub','reports',this)">Reports</span>
+    <span class="sub-item" onclick="sub('pub','working-papers',this)">Working Papers</span>
+    <span class="sub-item" onclick="sub('pub','policy-briefs',this)">Policy Briefs</span>
+  </div>
+  <div class="spg show" id="pub-all">
+    <div class="pub-page">
+      <div class="pub-grid">
+        <div class="pub-card r"><span class="pub-yr">2025</span><span class="pub-type">Report</span><h3 class="pub-title">State of Community Health Systems in Ghana</h3><p class="pub-author">Dr. Abena Asante &amp; Dr. Kofi Mensah · March 2025</p><p class="pub-excerpt">A comprehensive review of Ghana's community health infrastructure, findings from 48 CHPS zones across six regions, and recommendations for district-level reform.</p><span class="pub-dl">Download PDF →</span></div>
+        <div class="pub-card r"><span class="pub-yr">2024</span><span class="pub-type">Working Paper</span><h3 class="pub-title">Participatory Planning and Local Accountability</h3><p class="pub-author">Efua Darko · November 2024</p><p class="pub-excerpt">An analysis of participatory planning mechanisms in twelve Ghanaian District Assemblies — examining what conditions enable genuine citizen influence over local budgets.</p><span class="pub-dl">Download PDF →</span></div>
+        <div class="pub-card r"><span class="pub-yr">2024</span><span class="pub-type">Policy Brief</span><h3 class="pub-title">Women's Land Rights and Agricultural Productivity</h3><p class="pub-author">CRS Gender Team · August 2024</p><p class="pub-excerpt">Drawing on evidence from Volta and Oti Regions, this brief argues for legislative reform to secure women's land tenure as a prerequisite for sustainable agricultural development.</p><span class="pub-dl">Download PDF →</span></div>
+        <div class="pub-card r"><span class="pub-yr">2023</span><span class="pub-type">Report</span><h3 class="pub-title">Youth Civic Engagement in Urban Ghana</h3><p class="pub-author">Kwame Acheampong · June 2023</p><p class="pub-excerpt">Findings from a three-year longitudinal study tracking youth civic participation across Ghana — examining barriers, enablers, and the role of peer-led networks.</p><span class="pub-dl">Download PDF →</span></div>
+        <div class="pub-card r"><span class="pub-yr">2022</span><span class="pub-type">Working Paper</span><h3 class="pub-title">Climate Adaptation and Indigenous Knowledge in Northern Ghana</h3><p class="pub-author">Dr. Fatima Ibrahim · October 2022</p><p class="pub-excerpt">Documents traditional ecological knowledge held by farming communities in the northern savanna and its potential integration into formal climate adaptation frameworks.</p><span class="pub-dl">Download PDF →</span></div>
+        <div class="pub-card r"><span class="pub-yr">2021</span><span class="pub-type">Policy Brief</span><h3 class="pub-title">Decentralisation and Service Delivery: A Reform Agenda</h3><p class="pub-author">CRS Governance Team · April 2021</p><p class="pub-excerpt">Concrete recommendations for the Ministry of Local Government on improving service delivery through deeper fiscal and administrative decentralisation to district level.</p><span class="pub-dl">Download PDF →</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="spg" id="pub-reports">
+    <div class="pub-page">
+      <div class="pub-grid">
+        <div class="pub-card r"><span class="pub-yr">2025</span><span class="pub-type">Report</span><h3 class="pub-title">State of Community Health Systems in Ghana</h3><p class="pub-author">Dr. Abena Asante &amp; Dr. Kofi Mensah · March 2025</p><p class="pub-excerpt">Comprehensive review of Ghana's community health infrastructure covering 48 CHPS zones across six regions, with recommendations for district-level reform.</p><span class="pub-dl">Download PDF →</span></div>
+        <div class="pub-card r"><span class="pub-yr">2023</span><span class="pub-type">Report</span><h3 class="pub-title">Youth Civic Engagement in Urban Ghana</h3><p class="pub-author">Kwame Acheampong · June 2023</p><p class="pub-excerpt">Three-year longitudinal study tracking youth civic participation across Ghana — examining barriers, enablers, and the role of peer-led networks.</p><span class="pub-dl">Download PDF →</span></div>
+        <div class="pub-card r"><span class="pub-yr">2022</span><span class="pub-type">Report</span><h3 class="pub-title">Evaluating Smallholder Farmer Support in the Upper Regions</h3><p class="pub-author">CRS Livelihoods Team · January 2022</p><p class="pub-excerpt">End-of-programme evaluation covering four years of smallholder support across the Upper East and Upper West Regions, with lessons for future agricultural inclusion design.</p><span class="pub-dl">Download PDF →</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="spg" id="pub-working-papers">
+    <div class="pub-page">
+      <div class="pub-grid">
+        <div class="pub-card r"><span class="pub-yr">2024</span><span class="pub-type">Working Paper</span><h3 class="pub-title">Participatory Planning and Local Accountability</h3><p class="pub-author">Efua Darko · November 2024</p><p class="pub-excerpt">Analysis of participatory planning in twelve District Assemblies — examining conditions enabling genuine citizen influence over local budgets.</p><span class="pub-dl">Download PDF →</span></div>
+        <div class="pub-card r"><span class="pub-yr">2022</span><span class="pub-type">Working Paper</span><h3 class="pub-title">Climate Adaptation and Indigenous Knowledge in Northern Ghana</h3><p class="pub-author">Dr. Fatima Ibrahim · October 2022</p><p class="pub-excerpt">Documents and analyses traditional ecological knowledge held by farming communities in the northern savanna and its integration into formal adaptation frameworks.</p><span class="pub-dl">Download PDF →</span></div>
+        <div class="pub-card r"><span class="pub-yr">2020</span><span class="pub-type">Working Paper</span><h3 class="pub-title">Social Capital and Community Resilience in Coastal Ghana</h3><p class="pub-author">Dr. Emmanuel Boateng · March 2020</p><p class="pub-excerpt">Qualitative fieldwork in fishing communities along Ghana's central coast examines how informal social networks shape resilience in the face of external shocks.</p><span class="pub-dl">Download PDF →</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="spg" id="pub-policy-briefs">
+    <div class="pub-page">
+      <div class="pub-grid">
+        <div class="pub-card r"><span class="pub-yr">2024</span><span class="pub-type">Policy Brief</span><h3 class="pub-title">Women's Land Rights and Agricultural Productivity</h3><p class="pub-author">CRS Gender Team · August 2024</p><p class="pub-excerpt">Argues for legislative reform to secure women's land tenure in Volta and Oti Regions as a prerequisite for sustainable agricultural development.</p><span class="pub-dl">Download PDF →</span></div>
+        <div class="pub-card r"><span class="pub-yr">2021</span><span class="pub-type">Policy Brief</span><h3 class="pub-title">Decentralisation and Service Delivery: A Reform Agenda</h3><p class="pub-author">CRS Governance Team · April 2021</p><p class="pub-excerpt">Recommendations for the Ministry of Local Government on improving service delivery through deeper fiscal and administrative decentralisation.</p><span class="pub-dl">Download PDF →</span></div>
+        <div class="pub-card r"><span class="pub-yr">2019</span><span class="pub-type">Policy Brief</span><h3 class="pub-title">Community Health Worker Remuneration and Retention</h3><p class="pub-author">Dr. Abena Asante · September 2019</p><p class="pub-excerpt">Targeted brief to the Ghana Health Service on structural causes of community health worker attrition and a costed framework for improved remuneration.</p><span class="pub-dl">Download PDF →</span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="site-footer"><div class="footer-brand"><svg class="footer-mark" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="13.5" stroke="rgba(184,134,11,.38)" stroke-width="1.3"/><circle cx="15" cy="15" r="5" stroke="rgba(184,134,11,.38)" stroke-width="1.1"/><circle cx="15" cy="15" r="1.9" fill="rgba(184,134,11,.55)"/></svg><span class="footer-copy">© 2026 Community Resource Systems, Ghana.</span></div><ul class="footer-nav"><li><a onclick="go('blog')">Blog</a></li><li><a onclick="go('projects')">Projects</a></li><li><a onclick="go('contact')">Contact</a></li></ul></footer>
+</div>
+
+<!-- ══════════════════ PAGE: BLOG ══════════════════ -->
+<div class="pg" id="pg-blog">
+  <div class="pg-banner"><div><span class="pg-banner-eyebrow">Perspectives &amp; Field Notes</span><h1 class="pg-banner-h">The CRS<br><em>Blog.</em></h1></div><p class="pg-banner-body">Reflections from the field, analysis of emerging issues, and updates on our work — written by our practitioners, researchers, and community partners.</p></div>
+  <div class="subnav" id="blogNav">
+    <span class="sub-item on" onclick="sub('blog','all',this)">All Posts</span>
+    <span class="sub-item" onclick="sub('blog','articles',this)">Articles</span>
+    <span class="sub-item" onclick="sub('blog','field-notes',this)">Field Notes</span>
+    <span class="sub-item" onclick="sub('blog','news',this)">News &amp; Updates</span>
+  </div>
+  <div class="spg show" id="blog-all">
+    <div class="blog-page">
+      <div class="blog-grid">
+        <div class="blog-card r"><span class="blog-date">February 2026</span><span class="blog-tag">Article</span><h3 class="blog-h">Why Community-Led Development Still Matters</h3><p class="blog-by">Dr. Abena Asante, Executive Director</p><p class="blog-excerpt">Thirty years in this work has only deepened my conviction that the most durable change happens when communities lead it. Not because it is a nice idea — but because the evidence consistently shows it works better and lasts longer.</p><span class="blog-read cta">Read more →</span></div>
+        <div class="blog-card r"><span class="blog-date">January 2026</span><span class="blog-tag">Field Notes</span><h3 class="blog-h">Listening in the Upper East: Notes from the Field</h3><p class="blog-by">Kwame Acheampong, Programme Officer</p><p class="blog-excerpt">Three weeks in Bolgatanga, sitting with farmers, market women, and district officials — trying to understand what the data couldn't tell us. What I found challenged several assumptions I'd carried into the trip.</p><span class="blog-read cta">Read more →</span></div>
+        <div class="blog-card r"><span class="blog-date">December 2025</span><span class="blog-tag">News</span><h3 class="blog-h">CRS Launches Climate Resilience Programme in the North</h3><p class="blog-by">CRS Communications Team</p><p class="blog-excerpt">We are pleased to announce the launch of our three-year climate resilience programme in the Northern Region, working alongside 24 communities to integrate indigenous environmental knowledge into formal adaptation planning.</p><span class="blog-read cta">Read more →</span></div>
+        <div class="blog-card r"><span class="blog-date">November 2025</span><span class="blog-tag">Article</span><h3 class="blog-h">The Problem With "Best Practices"</h3><p class="blog-by">Efua Darko, Research Lead</p><p class="blog-excerpt">The development sector loves best practices. They travel well in PowerPoint slides and donor reports. But when you actually sit in a community in Volta Region and try to apply what worked somewhere else — things get complicated fast.</p><span class="blog-read cta">Read more →</span></div>
+        <div class="blog-card r"><span class="blog-date">October 2025</span><span class="blog-tag">Field Notes</span><h3 class="blog-h">What a Women's Susu Group Taught Me About Systems Change</h3><p class="blog-by">Ama Boateng, Gender Specialist</p><p class="blog-excerpt">I went to document a savings group. What I witnessed was a sophisticated governance system — transparent, accountable, adaptive — that had evolved without any external design input whatsoever.</p><span class="blog-read cta">Read more →</span></div>
+        <div class="blog-card r"><span class="blog-date">September 2025</span><span class="blog-tag">News</span><h3 class="blog-h">CRS Joins the Ghana Civil Society Platform on SDGs</h3><p class="blog-by">CRS Communications Team</p><p class="blog-excerpt">CRS has formally joined the Ghana Civil Society Platform on Sustainable Development Goals, contributing our research and community engagement expertise to the national SDG monitoring and advocacy process.</p><span class="blog-read cta">Read more →</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="spg" id="blog-articles">
+    <div class="blog-page">
+      <div class="blog-grid">
+        <div class="blog-card r"><span class="blog-date">February 2026</span><span class="blog-tag">Article</span><h3 class="blog-h">Why Community-Led Development Still Matters</h3><p class="blog-by">Dr. Abena Asante, Executive Director</p><p class="blog-excerpt">Thirty years in this work has only deepened my conviction that the most durable change happens when communities lead it — because the evidence consistently shows it works better and lasts longer.</p><span class="blog-read cta">Read more →</span></div>
+        <div class="blog-card r"><span class="blog-date">November 2025</span><span class="blog-tag">Article</span><h3 class="blog-h">The Problem With "Best Practices"</h3><p class="blog-by">Efua Darko, Research Lead</p><p class="blog-excerpt">The development sector loves best practices. But when you sit in Volta Region and try to apply what worked somewhere else, things get complicated fast. Context is everything.</p><span class="blog-read cta">Read more →</span></div>
+        <div class="blog-card r"><span class="blog-date">July 2025</span><span class="blog-tag">Article</span><h3 class="blog-h">Decentralisation at a Crossroads</h3><p class="blog-by">Dr. Emmanuel Boateng, Governance Advisor</p><p class="blog-excerpt">Ghana's decentralisation project has made real gains over three decades. But recent trends — fiscal recentralisation, shrinking local voice — suggest the gains are fragile. What happens next matters enormously.</p><span class="blog-read cta">Read more →</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="spg" id="blog-field-notes">
+    <div class="blog-page">
+      <div class="blog-grid">
+        <div class="blog-card r"><span class="blog-date">January 2026</span><span class="blog-tag">Field Notes</span><h3 class="blog-h">Listening in the Upper East: Notes from the Field</h3><p class="blog-by">Kwame Acheampong, Programme Officer</p><p class="blog-excerpt">Three weeks in Bolgatanga — trying to understand what the data couldn't tell us. What I found challenged several assumptions I had carried into the trip.</p><span class="blog-read cta">Read more →</span></div>
+        <div class="blog-card r"><span class="blog-date">October 2025</span><span class="blog-tag">Field Notes</span><h3 class="blog-h">What a Women's Susu Group Taught Me About Systems Change</h3><p class="blog-by">Ama Boateng, Gender Specialist</p><p class="blog-excerpt">I went to document a savings group. What I witnessed was a sophisticated governance system that had evolved without any external design input whatsoever.</p><span class="blog-read cta">Read more →</span></div>
+        <div class="blog-card r"><span class="blog-date">May 2025</span><span class="blog-tag">Field Notes</span><h3 class="blog-h">When the Programme Plan Meets Reality</h3><p class="blog-by">Dr. Fatima Ibrahim, Senior Researcher</p><p class="blog-excerpt">We designed a beautiful theory of change. The community had a different idea. This is the story of how we spent three months arguing — productively — about what the problem actually was.</p><span class="blog-read cta">Read more →</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="spg" id="blog-news">
+    <div class="blog-page">
+      <div class="blog-grid">
+        <div class="blog-card r"><span class="blog-date">December 2025</span><span class="blog-tag">News</span><h3 class="blog-h">CRS Launches Climate Resilience Programme in the North</h3><p class="blog-by">CRS Communications Team</p><p class="blog-excerpt">Three-year programme in the Northern Region, working alongside 24 communities to integrate indigenous environmental knowledge into formal adaptation planning.</p><span class="blog-read cta">Read more →</span></div>
+        <div class="blog-card r"><span class="blog-date">September 2025</span><span class="blog-tag">News</span><h3 class="blog-h">CRS Joins the Ghana Civil Society Platform on SDGs</h3><p class="blog-by">CRS Communications Team</p><p class="blog-excerpt">CRS has formally joined the Ghana Civil Society Platform on Sustainable Development Goals, contributing research and community engagement expertise to the national monitoring process.</p><span class="blog-read cta">Read more →</span></div>
+        <div class="blog-card r"><span class="blog-date">March 2025</span><span class="blog-tag">News</span><h3 class="blog-h">New Publication: State of Community Health Systems in Ghana</h3><p class="blog-by">CRS Communications Team</p><p class="blog-excerpt">CRS has released its flagship 2025 report on community health systems in Ghana — a comprehensive review covering 48 CHPS zones with recommendations for reform. Free to download.</p><span class="blog-read cta">Read more →</span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="site-footer"><div class="footer-brand"><svg class="footer-mark" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="13.5" stroke="rgba(184,134,11,.38)" stroke-width="1.3"/><circle cx="15" cy="15" r="5" stroke="rgba(184,134,11,.38)" stroke-width="1.1"/><circle cx="15" cy="15" r="1.9" fill="rgba(184,134,11,.55)"/></svg><span class="footer-copy">© 2026 Community Resource Systems, Ghana.</span></div><ul class="footer-nav"><li><a onclick="go('publications')">Publications</a></li><li><a onclick="go('projects')">Projects</a></li><li><a onclick="go('contact')">Contact</a></li></ul></footer>
+</div>
+
+<!-- ══════════════════ PAGE: CONTACT ══════════════════ -->
+<div class="pg" id="pg-contact">
+  <div class="pg-banner" style="border-bottom:none;padding-bottom:1.5rem"><div><span class="pg-banner-eyebrow">Get In Touch</span><h1 class="pg-banner-h">Let's build<br><em>together.</em></h1></div><p class="pg-banner-body">Whether you are navigating a complex community challenge, designing a new programme, or seeking an evaluation partner — we want to hear from you. We work with organisations of all sizes across Ghana.</p></div>
+  <div class="contact-wrap">
+    <div>
+      <h2 class="contact-h r">Reach us<br>in <em>Ghana.</em></h2>
+      <p class="contact-intro r">Our team works across Ghana. We typically respond within two working days and are happy to arrange an initial conversation at no cost.</p>
+      <div class="deets">
+        <div class="r"><span class="deet-label">Head Office</span><p class="deet-val">Community Resource Systems<br>14 Osu Badu Street, Osu<br>Greater Accra Region, Ghana</p></div>
+        <div class="r"><span class="deet-label">Email</span><p class="deet-val"><a href="mailto:info@crs.org.gh">info@crs.org.gh</a></p></div>
+        <div class="r"><span class="deet-label">Phone</span><p class="deet-val">+233 30 291 4400</p></div>
+        <div class="r"><span class="deet-label">Hours</span><p class="deet-val">Monday – Friday, 8:00am – 5:00pm GMT</p></div>
+      </div>
+    </div>
+    <form class="form r" onsubmit="submitForm(event)">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-field" type="text" placeholder="Kwame"></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-field" type="text" placeholder="Mensah"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Organisation</label><input class="form-field" type="text" placeholder="Where you work"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-field" type="email" placeholder="your@email.com"></div>
+      <div class="form-group"><label class="form-label">Area of Interest</label>
+        <select class="form-field"><option value="" disabled selected>Select a service area</option><option>Research &amp; Evaluation</option><option>Strategy &amp; Leadership</option><option>Capability Strengthening</option><option>Community Facilitation</option><option>Livelihoods &amp; Inclusion</option><option>Policy &amp; Governance</option><option>General Enquiry</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Message</label><textarea class="form-field form-textarea" placeholder="Tell us about your community, your challenge, or the change you are working towards…"></textarea></div>
+      <button class="form-btn" type="submit">Send Message <span class="form-btn-arr">→</span></button>
+    </form>
+  </div>
+  <div class="offices">
+    <div class="off-cell r"><span class="off-tag">Head Office</span><h3 class="off-city">Greater Accra</h3><p class="off-text">14 Osu Badu Street, Osu<br>Greater Accra Region<br>+233 30 291 4400</p></div>
+    <div class="off-cell r"><span class="off-tag">Northern Office</span><h3 class="off-city">Tamale</h3><p class="off-text">Northern Region<br>Serving Northern, Upper East &amp; Upper West<br>+233 37 202 1180</p></div>
+    <div class="off-cell r"><span class="off-tag">Middle Belt Office</span><h3 class="off-city">Kumasi</h3><p class="off-text">Ashanti Region<br>Serving Ashanti, Western &amp; Bono Regions<br>+233 32 209 5501</p></div>
+  </div>
+  <footer class="site-footer"><div class="footer-brand"><svg class="footer-mark" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="13.5" stroke="rgba(184,134,11,.38)" stroke-width="1.3"/><circle cx="15" cy="15" r="5" stroke="rgba(184,134,11,.38)" stroke-width="1.1"/><circle cx="15" cy="15" r="1.9" fill="rgba(184,134,11,.55)"/></svg><span class="footer-copy">© 2026 Community Resource Systems, Ghana.</span></div><ul class="footer-nav"><li><a onclick="go('services')">Services</a></li><li><a onclick="go('publications')">Publications</a></li><li><a onclick="go('blog')">Blog</a></li></ul></footer>
+</div>
+
+<script>
+// PAGE ROUTING
+function go(id){
+  document.querySelectorAll('.pg').forEach(p=>{p.classList.remove('show','vis');p.style.display='none'});
+  const t=document.getElementById('pg-'+id);
+  if(!t)return;
+  t.style.display='block';
+  window.scrollTo(0,0);
+  requestAnimationFrame(()=>{t.classList.add('show');requestAnimationFrame(()=>t.classList.add('vis'))});
+  document.querySelectorAll('.nav-link').forEach(a=>{
+    const pg=a.getAttribute('data-pg')||'';
+    a.classList.toggle('on',id===pg||id.startsWith(pg+'-'));
+  });
+  setTimeout(reveal,80);
+}
+
+// SUB-PAGE ROUTING
+function sub(section,subId,el){
+  const pgId=section==='pub'?'publications':'blog';
+  const prefix=section;
+  document.querySelectorAll(`#pg-${pgId} .spg`).forEach(s=>s.classList.remove('show'));
+  const t=document.getElementById(prefix+'-'+subId);
+  if(t){t.classList.add('show');setTimeout(reveal,80)}
+  const navId=section==='pub'?'pubNav':'blogNav';
+  document.querySelectorAll('#'+navId+' .sub-item').forEach(i=>i.classList.remove('on'));
+  if(el)el.classList.add('on');
+  else{
+    const items=document.querySelectorAll('#'+navId+' .sub-item');
+    const map={all:0,reports:1,'working-papers':2,'policy-briefs':3,articles:1,'field-notes':2,news:3};
+    if(items[map[subId]])items[map[subId]].classList.add('on');
+  }
+}
+
+// PROJECT FILTER
+function filt(cat,btn){
+  if(btn){document.querySelectorAll('.filt').forEach(b=>b.classList.remove('on'));btn.classList.add('on')}
+  document.querySelectorAll('.proj-card').forEach(c=>{c.style.display=(cat==='all'||c.dataset.cat===cat)?'':''});
+  if(cat==='all'){document.querySelectorAll('.proj-card').forEach(c=>c.style.display='')}
+  else{document.querySelectorAll('.proj-card').forEach(c=>{c.style.display=c.dataset.cat===cat?'':'none'})}
+}
+
+// SCROLL REVEAL
+function reveal(){
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        setTimeout(()=>e.target.classList.add('in'),50);
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:0.05,rootMargin:'0px 0px -20px 0px'});
+  document.querySelectorAll('.pg.show .r:not(.in)').forEach(el=>obs.observe(el));
+}
+
+// NAV SCROLL
+window.addEventListener('scroll',()=>{
+  document.getElementById('siteNav').classList.toggle('raised',window.scrollY>8);
+});
+
+// FORM
+function submitForm(e){
+  e.preventDefault();
+  const b=e.target.querySelector('.form-btn');
+  b.innerHTML='Message Sent ✓';
+  b.style.background='var(--forest)';
+  b.disabled=true;
+}
+
+// INIT
+const h=document.getElementById('pg-home');
+h.style.display='block';
+requestAnimationFrame(()=>{h.classList.add('show');requestAnimationFrame(()=>h.classList.add('vis'))});
+setTimeout(reveal,200);
+</script>
+</body>
+</html>

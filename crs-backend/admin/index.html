@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRS Admin — Content Management</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0F1A14;--canvas:#F7F8F5;--forest:#1A5C34;--sage:#4C8B5E;
+  --gold:#B8860B;--amber:#D4A017;--warm:#F0EDE4;--mist:#E4EADE;
+  --rule:#E0DDD6;--muted:#6B7A6F;--red:#C0392B;--green:#27AE60;
+  --sidebar:220px;--serif:'Georgia',serif;
+}
+html{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;
+  background:var(--canvas);color:var(--ink);height:100%;display:flex;flex-direction:column}
+
+/* ── AUTH SCREEN ── */
+#authScreen{
+  display:flex;align-items:center;justify-content:center;min-height:100vh;
+  background:var(--ink)
+}
+.login-card{background:#fff;padding:3rem;width:380px;border-top:3px solid var(--forest)}
+.login-logo{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem}
+.login-logo svg{width:36px;height:36px}
+.login-brand{font-family:var(--serif);font-size:1.05rem;color:var(--ink)}
+.login-brand span{display:block;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-family:sans-serif}
+.login-h{font-family:var(--serif);font-size:1.5rem;font-weight:400;margin-bottom:.4rem}
+.login-sub{font-size:.8rem;color:var(--muted);margin-bottom:2rem}
+.form-group{margin-bottom:1.2rem}
+.form-label{display:block;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.form-input{width:100%;padding:.75rem;border:1px solid var(--rule);background:var(--canvas);font-size:.9rem;font-family:inherit;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--forest)}
+.form-error{color:var(--red);font-size:.78rem;margin-top:.4rem;display:none}
+.btn{padding:.75rem 1.5rem;border:none;cursor:pointer;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;font-family:inherit;transition:background .2s}
+.btn-primary{background:var(--forest);color:#fff;width:100%}
+.btn-primary:hover{background:var(--ink)}
+.btn-sm{padding:.45rem 1rem;font-size:.68rem}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:#a93226}
+.btn-secondary{background:var(--rule);color:var(--ink)}
+.btn-secondary:hover{background:#d0cdc6}
+.btn-ghost{background:transparent;color:var(--forest);border:1px solid var(--mist);padding:.4rem .85rem}
+.btn-ghost:hover{background:var(--mist)}
+
+/* ── APP LAYOUT ── */
+#app{display:none;height:100vh;overflow:hidden;flex-direction:row}
+#app.show{display:flex}
+
+/* SIDEBAR */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;background:var(--ink);display:flex;
+  flex-direction:column;overflow-y:auto
+}
+.sidebar-logo{
+  display:flex;align-items:center;gap:.65rem;padding:1.4rem 1.2rem;
+  border-bottom:1px solid rgba(255,255,255,.07)
+}
+.sidebar-logo svg{width:28px;height:28px;flex-shrink:0}
+.sidebar-brand{font-family:var(--serif);font-size:.82rem;color:#fff;line-height:1.2}
+.sidebar-brand span{display:block;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(212,160,23,.7)}
+
+.sidebar-section{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(255,255,255,.28);padding:.9rem 1.2rem .35rem}
+
+.nav-link{
+  display:flex;align-items:center;gap:.7rem;padding:.7rem 1.2rem;
+  color:rgba(255,255,255,.5);cursor:pointer;font-size:.8rem;
+  border-left:2px solid transparent;transition:all .18s
+}
+.nav-link:hover,.nav-link.on{color:#fff;background:rgba(255,255,255,.05);border-left-color:var(--amber)}
+.nav-link svg{width:15px;height:15px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.6rem;padding:.12rem .45rem;border-radius:10px}
+
+.sidebar-footer{margin-top:auto;padding:1rem 1.2rem;border-top:1px solid rgba(255,255,255,.07)}
+.sidebar-user{font-size:.72rem;color:rgba(255,255,255,.4);margin-bottom:.6rem}
+.logout-btn{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);
+  background:none;border:none;cursor:pointer;padding:0;transition:color .2s}
+.logout-btn:hover{color:#fff}
+
+/* MAIN AREA */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 2rem;border-bottom:1px solid var(--rule);background:#fff;flex-shrink:0
+}
+.topbar-h{font-family:var(--serif);font-size:1.2rem;font-weight:400}
+.topbar-actions{display:flex;gap:.6rem}
+.content{padding:2rem;flex:1}
+
+/* ── DASHBOARD ── */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:#fff;padding:1.4rem 1.6rem;border-top:2px solid var(--forest)}
+.stat-card.orange{border-top-color:var(--amber)}
+.stat-card.red{border-top-color:var(--red)}
+.stat-n{font-family:var(--serif);font-size:2.2rem;font-weight:400;color:var(--ink);line-height:1}
+.stat-l{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:.35rem}
+
+.card{background:#fff;border:1px solid var(--rule);margin-bottom:1.5rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.4rem;border-bottom:1px solid var(--rule)}
+.card-title{font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:400}
+.card-body{padding:1.4rem}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  font-weight:400;padding:.6rem .9rem;text-align:left;border-bottom:2px solid var(--rule);background:var(--canvas)}
+.tbl td{padding:.75rem .9rem;border-bottom:1px solid var(--rule);font-size:.83rem;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--canvas)}
+.tbl-actions{display:flex;gap:.4rem;justify-content:flex-end}
+.badge{display:inline-block;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;
+  padding:.2rem .55rem;border-radius:2px}
+.badge-green{background:#d5f0de;color:#1A5C34}
+.badge-amber{background:#fdf1d5;color:#7a5500}
+.badge-grey{background:#eee;color:#666}
+.badge-red{background:#fde8e6;color:#922b21}
+
+/* ── FORM PANEL ── */
+.panel{background:#fff;border:1px solid var(--rule);padding:0;overflow:hidden}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.4rem;border-bottom:1px solid var(--rule);background:var(--canvas)}
+.panel-h{font-family:var(--serif);font-size:1rem;font-weight:400}
+.panel-body{padding:1.5rem}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:.38rem}
+.field input,.field select,.field textarea{
+  width:100%;padding:.65rem .75rem;border:1px solid var(--rule);background:#fff;
+  font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s;
+  -webkit-appearance:none
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--forest)}
+.field textarea{resize:vertical;min-height:90px}
+.field-hint{font-size:.72rem;color:var(--muted);margin-top:.3rem}
+.form-actions{display:flex;align-items:center;gap:.7rem;padding-top:1rem;border-top:1px solid var(--rule)}
+
+/* ── CONTACTS ── */
+.contact-row{cursor:pointer}
+.contact-row.unread td{font-weight:500}
+.contact-detail{padding:1.4rem;border-top:1px solid var(--rule);background:var(--canvas);display:none}
+.contact-detail.show{display:block}
+.msg-body{background:#fff;padding:1rem;border:1px solid var(--rule);line-height:1.7;font-size:.88rem;white-space:pre-wrap}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:2rem;right:2rem;z-index:9999;
+  padding:.75rem 1.4rem;font-size:.82rem;color:#fff;
+  background:var(--forest);transform:translateY(100px);opacity:0;
+  transition:all .3s;pointer-events:none
+}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.error{background:var(--red)}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:3rem;color:var(--muted);font-size:.85rem}
+.empty svg{width:36px;height:36px;margin:0 auto 1rem;display:block;opacity:.3}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;display:none;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:#fff;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;border-bottom:1px solid var(--rule)}
+.modal-h{font-family:var(--serif);font-size:1.1rem;font-weight:400}
+.modal-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);line-height:1}
+.modal-body{padding:1.4rem}
+.modal-footer{padding:1rem 1.4rem;border-top:1px solid var(--rule);display:flex;gap:.6rem;justify-content:flex-end}
+
+/* ── LOADING ── */
+.loading{display:flex;align-items:center;gap:.6rem;color:var(--muted);padding:2rem;font-size:.85rem}
+.spinner{width:18px;height:18px;border:2px solid var(--rule);border-top-color:var(--forest);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:800px){
+  .sidebar{display:none}
+  .stat-row{grid-template-columns:1fr 1fr}
+  .field-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ AUTH ═══ -->
+<div id="authScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 30 30" fill="none">
+        <circle cx="15" cy="15" r="13.5" stroke="#1A5C34" stroke-width="1.5"/>
+        <line x1="15" y1="1.5" x2="15" y2="7" stroke="#B8860B" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="15" y1="23" x2="15" y2="28.5" stroke="#B8860B" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="1.5" y1="15" x2="7" y2="15" stroke="#B8860B" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="23" y1="15" x2="28.5" y2="15" stroke="#B8860B" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="15" cy="15" r="5" stroke="#1A5C34" stroke-width="1.2"/>
+        <circle cx="15" cy="15" r="2" fill="#B8860B"/>
+      </svg>
+      <div class="login-brand">Community Resource Systems<span>Admin Portal</span></div>
+    </div>
+    <h2 class="login-h">Sign in</h2>
+    <p class="login-sub">Content management for the CRS Ghana website.</p>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input class="form-input" id="loginUser" type="text" autocomplete="username" placeholder="admin">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••">
+      <div class="form-error" id="loginErr">Incorrect username or password.</div>
+    </div>
+    <button class="btn btn-primary" onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 30 30" fill="none"><circle cx="15" cy="15" r="13.5" stroke="rgba(184,134,11,.6)" stroke-width="1.3"/><circle cx="15" cy="15" r="5" stroke="rgba(184,134,11,.5)" stroke-width="1.1"/><circle cx="15" cy="15" r="2" fill="rgba(184,134,11,.7)"/></svg>
+      <div class="sidebar-brand">CRS Ghana<span>Admin CMS</span></div>
+    </div>
+    <p class="sidebar-section">Overview</p>
+    <div class="nav-link on" onclick="showView('dashboard')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>
+      Dashboard
+    </div>
+    <p class="sidebar-section">Content</p>
+    <div class="nav-link" onclick="showView('services')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="11"/><line x1="5" y1="8" x2="11" y2="8"/></svg>
+      Services
+    </div>
+    <div class="nav-link" onclick="showView('projects')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1"/><line x1="1" y1="6" x2="15" y2="6"/></svg>
+      Projects
+    </div>
+    <div class="nav-link" onclick="showView('publications')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h8l3 3v9H3z"/><line x1="6" y1="7" x2="11" y2="7"/><line x1="6" y1="10" x2="11" y2="10"/></svg>
+      Publications
+    </div>
+    <div class="nav-link" onclick="showView('posts')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2h12v3H2z"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="11" x2="10" y2="11"/></svg>
+      Blog Posts
+    </div>
+    <p class="sidebar-section">Enquiries</p>
+    <div class="nav-link" onclick="showView('contacts')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h12v9a1 1 0 01-1 1H3a1 1 0 01-1-1V3z"/><polyline points="2,3 8,9 14,3"/></svg>
+      Contact Messages
+      <span class="nav-badge" id="badgeCount" style="display:none">0</span>
+    </div>
+    <p class="sidebar-section">Account</p>
+    <div class="nav-link" onclick="showView('settings')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M11.4 3.2l-1.4 1.4M3.2 11.4l1.4 1.4"/></svg>
+      Settings
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="sidebarUser"></div>
+      <button class="logout-btn" onclick="doLogout()">Sign out →</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <h1 class="topbar-h" id="topbarH">Dashboard</h1>
+      <div class="topbar-actions" id="topbarActions"></div>
+    </div>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h3 class="modal-h" id="modalH"></h3>
+      <button class="modal-close" onclick="closeModalDirect()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let TOKEN = localStorage.getItem('crs_token') || '';
+let currentView = 'dashboard';
+let editingId = null;
+// Change this to your actual API URL when deployed
+const API = window.location.origin;
+
+// ─── UTILITIES ────────────────────────────────────────────────────────────────
+async function api(method, path, body, isForm) {
+  const opts = {
+    method,
+    headers: { Authorization: `Bearer ${TOKEN}` },
+  };
+  if (isForm) {
+    opts.body = body; // FormData
+  } else if (body) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  const r = await fetch(API + path, opts);
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Request failed');
+  return d.data;
+}
+
+function toast(msg, err) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (err ? ' error' : '');
+  setTimeout(() => t.className = '', 2800);
+}
+
+function setView(id, title, actions = '') {
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('on'));
+  const link = [...document.querySelectorAll('.nav-link')].find(l =>
+    l.getAttribute('onclick') && l.getAttribute('onclick').includes(`'${id}'`));
+  if (link) link.classList.add('on');
+  document.getElementById('topbarH').textContent = title;
+  document.getElementById('topbarActions').innerHTML = actions;
+  currentView = id;
+}
+
+function loading() {
+  document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div>Loading…</div>';
+}
+
+function openModal(title, body, footer) {
+  document.getElementById('modalH').textContent = title;
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modalFooter').innerHTML = footer;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+function closeModal(e) { if (e.target === document.getElementById('modalBg')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('modalBg').classList.remove('show'); }
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  document.getElementById('loginErr').style.display = 'none';
+  try {
+    const r = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: u, password: p }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error();
+    TOKEN = d.data.token;
+    localStorage.setItem('crs_token', TOKEN);
+    document.getElementById('sidebarUser').textContent = d.data.username;
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('app').classList.add('show');
+    showView('dashboard');
+  } catch {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('authScreen').style.display !== 'none') doLogin();
+});
+
+function doLogout() {
+  TOKEN = '';
+  localStorage.removeItem('crs_token');
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('authScreen').style.display = 'flex';
+}
+
+// Auto-login if token stored
+if (TOKEN) {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('app').classList.add('show');
+  // decode username from token
+  try {
+    const payload = JSON.parse(atob(TOKEN.split('.')[1]));
+    document.getElementById('sidebarUser').textContent = payload.username;
+  } catch {}
+  showView('dashboard');
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+async function showDashboard() {
+  setView('dashboard', 'Dashboard');
+  loading();
+  try {
+    const s = await api('GET', '/api/stats');
+    const recent = await api('GET', '/api/contacts?unread=1');
+    if (s.contacts_new > 0) {
+      document.getElementById('badgeCount').textContent = s.contacts_new;
+      document.getElementById('badgeCount').style.display = '';
+    }
+    document.getElementById('content').innerHTML = `
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-n">${s.services}</div><div class="stat-l">Services</div></div>
+        <div class="stat-card"><div class="stat-n">${s.projects}</div><div class="stat-l">Projects</div></div>
+        <div class="stat-card orange"><div class="stat-n">${s.publications}</div><div class="stat-l">Publications</div></div>
+        <div class="stat-card"><div class="stat-n">${s.posts}</div><div class="stat-l">Published Posts</div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-card orange"><div class="stat-n">${s.drafts}</div><div class="stat-l">Draft Posts</div></div>
+        <div class="stat-card red"><div class="stat-n">${s.contacts_new}</div><div class="stat-l">New Messages</div></div>
+        <div class="stat-card"><div class="stat-n">${s.contacts_all}</div><div class="stat-l">Total Enquiries</div></div>
+        <div class="stat-card"><div class="stat-n">4</div><div class="stat-l">Content Types</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Recent Unread Messages</span>
+          <button class="btn btn-ghost btn-sm" onclick="showView('contacts')">View All</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          ${recent.length === 0 ? '<div class="empty">No unread messages</div>' :
+            `<table class="tbl"><thead><tr><th>From</th><th>Email</th><th>Interest</th><th>Received</th></tr></thead><tbody>
+            ${recent.slice(0,5).map(c => `<tr><td><strong>${esc(c.first_name)} ${esc(c.last_name)}</strong><br><small style="color:var(--muted)">${esc(c.organisation||'')}</small></td>
+            <td>${esc(c.email)}</td><td>${esc(c.interest||'—')}</td>
+            <td>${c.created_at.slice(0,10)}</td></tr>`).join('')}
+            </tbody></table>`}
+        </div>
+      </div>`;
+  } catch (e) { document.getElementById('content').innerHTML = `<div class="empty">Could not load stats. <small>${e.message}</small></div>`; }
+}
+
+// ─── SERVICES ─────────────────────────────────────────────────────────────────
+async function showServices() {
+  setView('services', 'Services', `<button class="btn btn-primary btn-sm" onclick="openServiceForm()">+ Add Service</button>`);
+  loading();
+  const rows = await api('GET', '/api/services');
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="card-header"><span class="card-title">${rows.length} Services</span></div>
+      <table class="tbl">
+        <thead><tr><th>#</th><th>Name</th><th>Short Description</th><th>Status</th><th></th></tr></thead>
+        <tbody>${rows.map(s => `
+          <tr>
+            <td><strong>${esc(s.number)}</strong></td>
+            <td><strong>${esc(s.name)}</strong></td>
+            <td style="max-width:340px;color:var(--muted)">${esc(s.short_desc).slice(0,80)}…</td>
+            <td><span class="badge ${s.active?'badge-green':'badge-grey'}">${s.active?'Active':'Hidden'}</span></td>
+            <td><div class="tbl-actions">
+              <button class="btn btn-ghost btn-sm" onclick="openServiceForm(${s.id})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteItem('services',${s.id},'${esc(s.name)}')">Delete</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function openServiceForm(id) {
+  editingId = id || null;
+  let data = { number:'', name:'', short_desc:'', full_desc:'', active:1, sort_order:0 };
+  if (id) data = await api('GET', `/api/services/${id}`);
+  openModal(id ? 'Edit Service' : 'Add Service', `
+    <div class="field-row">
+      <div class="field"><label>Number</label><input id="svcNum" value="${esc(data.number)}" placeholder="01"></div>
+      <div class="field"><label>Sort Order</label><input id="svcOrder" type="number" value="${data.sort_order}"></div>
+    </div>
+    <div class="field"><label>Service Name</label><input id="svcName" value="${esc(data.name)}" placeholder="Research &amp; Evaluation"></div>
+    <div class="field"><label>Short Description <span style="color:var(--muted);font-size:.7rem">(shown on cards)</span></label>
+      <textarea id="svcShort">${esc(data.short_desc)}</textarea></div>
+    <div class="field"><label>Full Description <span style="color:var(--muted);font-size:.7rem">(shown on service page)</span></label>
+      <textarea id="svcFull" style="min-height:120px">${esc(data.full_desc||'')}</textarea></div>
+    <div class="field"><label>Status</label>
+      <select id="svcActive"><option value="1" ${data.active?'selected':''}>Active</option><option value="0" ${!data.active?'selected':''}>Hidden</option></select>
+    </div>`,
+    `<button class="btn btn-secondary btn-sm" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary btn-sm" onclick="saveService()">Save Service</button>`);
+}
+
+async function saveService() {
+  const body = {
+    number: v('svcNum'), name: v('svcName'), short_desc: v('svcShort'),
+    full_desc: v('svcFull'), active: parseInt(v('svcActive')), sort_order: parseInt(v('svcOrder'))||0
+  };
+  try {
+    if (editingId) await api('PUT', `/api/services/${editingId}`, body);
+    else await api('POST', '/api/services', body);
+    closeModalDirect(); toast('Service saved ✓'); showServices();
+  } catch (e) { toast(e.message, true); }
+}
+
+// ─── PROJECTS ─────────────────────────────────────────────────────────────────
+async function showProjects() {
+  setView('projects', 'Projects', `<button class="btn btn-primary btn-sm" onclick="openProjectForm()">+ Add Project</button>`);
+  loading();
+  const rows = await api('GET', '/api/projects');
+  const catBadge = c => ({ livelihoods:'badge-green', health:'badge-amber', youth:'badge-amber', governance:'badge-grey', gender:'badge-amber', environment:'badge-green' })[c] || 'badge-grey';
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="card-header"><span class="card-title">${rows.length} Projects</span></div>
+      <table class="tbl">
+        <thead><tr><th>Title</th><th>Category</th><th>Years</th><th>Location</th><th>Status</th><th></th></tr></thead>
+        <tbody>${rows.map(p => `
+          <tr>
+            <td><strong>${esc(p.title)}</strong></td>
+            <td><span class="badge ${catBadge(p.category)}">${esc(p.category)}</span></td>
+            <td style="white-space:nowrap;color:var(--muted)">${esc(p.years)}</td>
+            <td style="color:var(--muted)">${esc(p.location)}</td>
+            <td><span class="badge ${p.status==='active'?'badge-green':'badge-grey'}">${esc(p.status)}</span></td>
+            <td><div class="tbl-actions">
+              <button class="btn btn-ghost btn-sm" onclick="openProjectForm(${p.id})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteItem('projects',${p.id},'${esc(p.title)}')">Delete</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function openProjectForm(id) {
+  editingId = id || null;
+  let d = { title:'', category:'livelihoods', years:'', location:'', description:'', status:'active', sort_order:0 };
+  if (id) d = await api('GET', `/api/projects/${id}`);
+  const cats = ['livelihoods','health','governance','youth','gender','environment'];
+  openModal(id ? 'Edit Project' : 'Add Project', `
+    <div class="field"><label>Title</label><input id="pjTitle" value="${esc(d.title)}"></div>
+    <div class="field-row">
+      <div class="field"><label>Category</label><select id="pjCat">${cats.map(c=>`<option value="${c}" ${d.category===c?'selected':''}>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Status</label><select id="pjStatus"><option value="active" ${d.status==='active'?'selected':''}>Active</option><option value="completed" ${d.status==='completed'?'selected':''}>Completed</option></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Years</label><input id="pjYears" value="${esc(d.years)}" placeholder="2023–2026"></div>
+      <div class="field"><label>Sort Order</label><input id="pjOrder" type="number" value="${d.sort_order}"></div>
+    </div>
+    <div class="field"><label>Location</label><input id="pjLoc" value="${esc(d.location)}" placeholder="Ashanti Region"></div>
+    <div class="field"><label>Description</label><textarea id="pjDesc" style="min-height:110px">${esc(d.description)}</textarea></div>`,
+    `<button class="btn btn-secondary btn-sm" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary btn-sm" onclick="saveProject()">Save Project</button>`);
+}
+
+async function saveProject() {
+  const body = { title:v('pjTitle'), category:v('pjCat'), years:v('pjYears'), location:v('pjLoc'),
+    description:v('pjDesc'), status:v('pjStatus'), sort_order:parseInt(v('pjOrder'))||0 };
+  try {
+    if (editingId) await api('PUT', `/api/projects/${editingId}`, body);
+    else await api('POST', '/api/projects', body);
+    closeModalDirect(); toast('Project saved ✓'); showProjects();
+  } catch (e) { toast(e.message, true); }
+}
+
+// ─── PUBLICATIONS ─────────────────────────────────────────────────────────────
+async function showPublications() {
+  setView('publications', 'Publications', `<button class="btn btn-primary btn-sm" onclick="openPubForm()">+ Add Publication</button>`);
+  loading();
+  const rows = await api('GET', '/api/publications');
+  const typeBadge = t => ({ 'Report':'badge-green', 'Working Paper':'badge-amber', 'Policy Brief':'badge-grey' })[t] || 'badge-grey';
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="card-header"><span class="card-title">${rows.length} Publications</span></div>
+      <table class="tbl">
+        <thead><tr><th>Title</th><th>Type</th><th>Authors</th><th>Year</th><th>PDF</th><th></th></tr></thead>
+        <tbody>${rows.map(p => `
+          <tr>
+            <td style="max-width:260px"><strong>${esc(p.title)}</strong></td>
+            <td><span class="badge ${typeBadge(p.type)}">${esc(p.type)}</span></td>
+            <td style="color:var(--muted);max-width:160px">${esc(p.authors)}</td>
+            <td>${p.year}</td>
+            <td>${p.file_url ? `<a href="${p.file_url}" target="_blank" style="color:var(--forest);font-size:.75rem">PDF ↗</a>` : '<span style="color:var(--muted)">—</span>'}</td>
+            <td><div class="tbl-actions">
+              <button class="btn btn-ghost btn-sm" onclick="openPubForm(${p.id})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteItem('publications',${p.id},'${esc(p.title)}')">Delete</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function openPubForm(id) {
+  editingId = id || null;
+  let d = { type:'Report', title:'', authors:'', pub_date:'', year:new Date().getFullYear(), excerpt:'', file_url:'', active:1, sort_order:0 };
+  if (id) d = await api('GET', `/api/publications/${id}`);
+  openModal(id ? 'Edit Publication' : 'Add Publication', `
+    <div class="field-row">
+      <div class="field"><label>Type</label><select id="pubType">
+        ${['Report','Working Paper','Policy Brief'].map(t=>`<option ${d.type===t?'selected':''}>${t}</option>`).join('')}
+      </select></div>
+      <div class="field"><label>Year</label><input id="pubYear" type="number" value="${d.year}"></div>
+    </div>
+    <div class="field"><label>Title</label><input id="pubTitle" value="${esc(d.title)}"></div>
+    <div class="field"><label>Authors</label><input id="pubAuth" value="${esc(d.authors)}" placeholder="Dr. Abena Asante · March 2025"></div>
+    <div class="field"><label>Publication Date</label><input id="pubDate" value="${esc(d.pub_date)}" placeholder="March 2025"></div>
+    <div class="field"><label>Excerpt</label><textarea id="pubExcerpt" style="min-height:80px">${esc(d.excerpt)}</textarea></div>
+    <div class="field"><label>Upload PDF <span style="color:var(--muted);font-size:.7rem">(optional)</span></label>
+      <input type="file" id="pubFile" accept=".pdf" style="padding:.4rem 0">
+      ${d.file_url ? `<div class="field-hint">Current: <a href="${d.file_url}" target="_blank" style="color:var(--forest)">View PDF ↗</a></div>` : ''}
+    </div>
+    <div class="field"><label>Status</label><select id="pubActive">
+      <option value="1" ${d.active?'selected':''}>Active</option>
+      <option value="0" ${!d.active?'selected':''}>Hidden</option>
+    </select></div>`,
+    `<button class="btn btn-secondary btn-sm" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary btn-sm" onclick="savePub()">Save Publication</button>`);
+}
+
+async function savePub() {
+  const fd = new FormData();
+  fd.append('type', v('pubType'));
+  fd.append('title', v('pubTitle'));
+  fd.append('authors', v('pubAuth'));
+  fd.append('pub_date', v('pubDate'));
+  fd.append('year', v('pubYear'));
+  fd.append('excerpt', v('pubExcerpt'));
+  fd.append('active', v('pubActive'));
+  const file = document.getElementById('pubFile').files[0];
+  if (file) fd.append('pdf', file);
+  try {
+    if (editingId) await api('PUT', `/api/publications/${editingId}`, fd, true);
+    else await api('POST', '/api/publications', fd, true);
+    closeModalDirect(); toast('Publication saved ✓'); showPublications();
+  } catch (e) { toast(e.message, true); }
+}
+
+// ─── BLOG POSTS ───────────────────────────────────────────────────────────────
+async function showPosts() {
+  setView('posts', 'Blog Posts', `<button class="btn btn-primary btn-sm" onclick="openPostForm()">+ New Post</button>`);
+  loading();
+  const rows = await api('GET', '/api/posts?all=1');
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="card-header"><span class="card-title">${rows.length} Posts</span></div>
+      <table class="tbl">
+        <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Status</th><th></th></tr></thead>
+        <tbody>${rows.map(p => `
+          <tr>
+            <td style="max-width:240px"><strong>${esc(p.title)}</strong><br><small style="color:var(--muted)">${esc(p.slug)}</small></td>
+            <td><span class="badge badge-amber">${esc(p.category)}</span></td>
+            <td style="color:var(--muted)">${esc(p.author)}</td>
+            <td style="white-space:nowrap;color:var(--muted)">${esc(p.pub_date)}</td>
+            <td><span class="badge ${p.published?'badge-green':'badge-grey'}">${p.published?'Published':'Draft'}</span></td>
+            <td><div class="tbl-actions">
+              <button class="btn btn-ghost btn-sm" onclick="openPostForm(${p.id})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteItem('posts',${p.id},'${esc(p.title)}')">Delete</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function openPostForm(id) {
+  editingId = id || null;
+  let d = { category:'articles', title:'', author:'', author_role:'', pub_date:'', excerpt:'', body:'', published:0, sort_order:0 };
+  if (id) d = await api('GET', `/api/posts/id/${id}`);
+  const cats = ['articles','field-notes','news'];
+  document.getElementById('content').innerHTML = `
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-h">${id ? 'Edit Post' : 'New Post'}</h2>
+        <button class="btn btn-secondary btn-sm" onclick="showView('posts')">← Back</button>
+      </div>
+      <div class="panel-body">
+        <div class="field"><label>Title</label><input id="postTitle" value="${esc(d.title)}" placeholder="Post title"></div>
+        <div class="field-row">
+          <div class="field"><label>Category</label><select id="postCat">${cats.map(c=>`<option value="${c}" ${d.category===c?'selected':''}>${c}</option>`).join('')}</select></div>
+          <div class="field"><label>Status</label><select id="postPub"><option value="0" ${!d.published?'selected':''}>Draft</option><option value="1" ${d.published?'selected':''}>Published</option></select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Author</label><input id="postAuth" value="${esc(d.author)}" placeholder="Dr. Abena Asante"></div>
+          <div class="field"><label>Author Role</label><input id="postRole" value="${esc(d.author_role||'')}" placeholder="Executive Director"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Publication Date</label><input id="postDate" value="${esc(d.pub_date)}" placeholder="February 2026"></div>
+          <div class="field"><label>Sort Order</label><input id="postOrder" type="number" value="${d.sort_order}"></div>
+        </div>
+        <div class="field"><label>Excerpt <span style="color:var(--muted);font-size:.7rem">(shown on blog listing)</span></label>
+          <textarea id="postExcerpt" style="min-height:80px">${esc(d.excerpt)}</textarea></div>
+        <div class="field"><label>Body <span style="color:var(--muted);font-size:.7rem">(full post content — plain text or HTML)</span></label>
+          <textarea id="postBody" style="min-height:280px;font-family:monospace;font-size:.82rem">${esc(d.body||'')}</textarea></div>
+        <div class="field"><label>Cover Image <span style="color:var(--muted);font-size:.7rem">(optional)</span></label>
+          <input type="file" id="postImg" accept="image/*" style="padding:.4rem 0">
+          ${d.cover_image ? `<div class="field-hint">Current: <img src="${d.cover_image}" style="height:40px;margin-top:.4rem;border:1px solid var(--rule)"></div>` : ''}
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-secondary btn-sm" onclick="showView('posts')">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="savePost()">Save Post</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function savePost() {
+  const fd = new FormData();
+  fd.append('category', v('postCat'));
+  fd.append('title', v('postTitle'));
+  fd.append('author', v('postAuth'));
+  fd.append('author_role', v('postRole'));
+  fd.append('pub_date', v('postDate'));
+  fd.append('excerpt', v('postExcerpt'));
+  fd.append('body', v('postBody'));
+  fd.append('published', v('postPub'));
+  fd.append('sort_order', v('postOrder'));
+  const img = document.getElementById('postImg').files[0];
+  if (img) fd.append('cover_image', img);
+  try {
+    if (editingId) await api('PUT', `/api/posts/${editingId}`, fd, true);
+    else await api('POST', '/api/posts', fd, true);
+    toast('Post saved ✓'); showPosts();
+  } catch (e) { toast(e.message, true); }
+}
+
+// ─── CONTACTS ─────────────────────────────────────────────────────────────────
+async function showContacts() {
+  setView('contacts', 'Contact Messages');
+  loading();
+  const rows = await api('GET', '/api/contacts');
+  document.getElementById('badgeCount').style.display = 'none';
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="card-header"><span class="card-title">${rows.length} Messages &mdash; ${rows.filter(r=>!r.read).length} unread</span></div>
+      <table class="tbl">
+        <thead><tr><th>From</th><th>Organisation</th><th>Email</th><th>Interest</th><th>Date</th><th></th></tr></thead>
+        <tbody id="contactRows">
+        ${rows.map(c => `
+          <tr class="contact-row ${!c.read?'unread':''}" id="crow-${c.id}">
+            <td><strong>${esc(c.first_name)} ${esc(c.last_name)}</strong>${!c.read?' <span class="badge badge-red" style="font-size:.55rem">new</span>':''}</td>
+            <td style="color:var(--muted)">${esc(c.organisation||'—')}</td>
+            <td><a href="mailto:${esc(c.email)}" style="color:var(--forest)">${esc(c.email)}</a></td>
+            <td style="color:var(--muted)">${esc(c.interest||'—')}</td>
+            <td style="white-space:nowrap;color:var(--muted)">${c.created_at.slice(0,10)}</td>
+            <td><div class="tbl-actions">
+              <button class="btn btn-ghost btn-sm" onclick="expandContact(${c.id})">View</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteItem('contacts',${c.id},'this message')">Delete</button>
+            </div></td>
+          </tr>
+          <tr id="cdetail-${c.id}"><td colspan="6" style="padding:0">
+            <div class="contact-detail" id="cd-${c.id}">
+              <strong style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Message from ${esc(c.first_name)} ${esc(c.last_name)}</strong>
+              <div class="msg-body" style="margin-top:.75rem">${esc(c.message)}</div>
+              <div style="margin-top:.75rem;display:flex;gap:.6rem;align-items:center">
+                <a href="mailto:${esc(c.email)}?subject=Re:%20your%20enquiry%20to%20CRS" class="btn btn-primary btn-sm">Reply via Email</a>
+                <button class="btn btn-secondary btn-sm" onclick="markRead(${c.id})">Mark as Read</button>
+              </div>
+            </div>
+          </td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function expandContact(id) {
+  const d = document.getElementById(`cd-${id}`);
+  d.classList.toggle('show');
+  await api('PATCH', `/api/contacts/${id}/read`);
+  const row = document.getElementById(`crow-${id}`);
+  if (row) row.classList.remove('unread');
+}
+
+async function markRead(id) {
+  await api('PATCH', `/api/contacts/${id}/read`);
+  toast('Marked as read');
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────────────────────────
+function showSettings() {
+  setView('settings', 'Settings');
+  document.getElementById('content').innerHTML = `
+    <div class="card" style="max-width:460px">
+      <div class="card-header"><span class="card-title">Change Password</span></div>
+      <div class="card-body">
+        <div class="field"><label>Current Password</label><input type="password" id="pwCurrent"></div>
+        <div class="field"><label>New Password</label><input type="password" id="pwNew" placeholder="Minimum 8 characters"></div>
+        <div class="field"><label>Confirm New Password</label><input type="password" id="pwConfirm"></div>
+        <button class="btn btn-primary btn-sm" onclick="changePassword()">Update Password</button>
+      </div>
+    </div>
+    <div class="card" style="max-width:460px;margin-top:1.2rem">
+      <div class="card-header"><span class="card-title">API Endpoints</span></div>
+      <div class="card-body">
+        <p style="font-size:.8rem;color:var(--muted);line-height:1.8">Your frontend fetches from these endpoints:</p>
+        <div style="background:var(--canvas);padding:1rem;font-family:monospace;font-size:.75rem;line-height:2;margin-top:.75rem;border:1px solid var(--rule)">
+          GET  /api/services<br>
+          GET  /api/projects?category=health<br>
+          GET  /api/publications?type=Report<br>
+          GET  /api/posts?category=articles<br>
+          POST /api/contact
+        </div>
+      </div>
+    </div>`;
+}
+
+async function changePassword() {
+  const c = v('pwCurrent'), n = v('pwNew'), cf = v('pwConfirm');
+  if (n !== cf) return toast('Passwords do not match', true);
+  if (n.length < 8) return toast('Minimum 8 characters', true);
+  try {
+    await api('POST', '/api/auth/change-password', { current: c, next: n });
+    toast('Password updated ✓');
+    document.getElementById('pwCurrent').value = '';
+    document.getElementById('pwNew').value = '';
+    document.getElementById('pwConfirm').value = '';
+  } catch (e) { toast(e.message, true); }
+}
+
+// ─── DELETE ───────────────────────────────────────────────────────────────────
+function deleteItem(type, id, name) {
+  openModal('Confirm Delete',
+    `<p style="font-size:.9rem;line-height:1.7">Are you sure you want to delete <strong>${name}</strong>? This cannot be undone.</p>`,
+    `<button class="btn btn-secondary btn-sm" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-danger btn-sm" onclick="confirmDelete('${type}',${id})">Delete</button>`);
+}
+
+async function confirmDelete(type, id) {
+  try {
+    await api('DELETE', `/api/${type}/${id}`);
+    closeModalDirect(); toast('Deleted'); showView(type);
+  } catch (e) { toast(e.message, true); }
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+function showView(view) {
+  const map = { dashboard:showDashboard, services:showServices, projects:showProjects,
+    publications:showPublications, posts:showPosts, contacts:showContacts, settings:showSettings };
+  if (map[view]) map[view]();
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function v(id) { return (document.getElementById(id)||{}).value || ''; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>
